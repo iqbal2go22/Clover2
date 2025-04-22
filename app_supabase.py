@@ -25,12 +25,6 @@ def safe_import(module_name):
 # Check if we can import needed modules
 db_utils = safe_import("cloud_db_utils")
 
-# If we couldn't import the module, show a clear error
-if not db_utils:
-    st.warning("The app cannot continue without required modules.")
-    st.info("Please check that all required Python modules are installed.")
-    st.stop()  # Stop execution to prevent further errors
-
 # Check if secrets are configured
 secrets_ok = False
 if hasattr(st, 'secrets'):
@@ -54,30 +48,67 @@ if hasattr(st, 'secrets'):
 else:
     st.error("❌ No secrets configured")
 
-# Only attempt to use database if secrets are configured
-if secrets_ok:
-    # Safely try to connect to the database
+# DATABASE MANAGEMENT SECTION
+st.markdown("---")
+st.header("Database Management")
+st.markdown("Use these controls to set up and manage your database:")
+
+# Always show the database initialization button
+initialize_button = st.button("Initialize Database Tables", key="init_db", type="primary")
+if initialize_button:
+    if db_utils:
+        try:
+            db_utils.create_database()
+            st.success("✅ Database tables created successfully")
+        except Exception as e:
+            st.error(f"❌ Error creating database tables: {str(e)}")
+    else:
+        st.error("❌ Cannot initialize database - module not loaded")
+
+# Always show the sync data button
+sync_button = st.button("Sync Recent Data (Last 7 Days)", key="sync_data", type="primary")
+if sync_button:
+    if db_utils:
+        try:
+            import incremental_sync
+            st.success("✅ Successfully imported incremental_sync module")
+            st.info("Starting data synchronization...")
+            
+            # Getting stores
+            stores = db_utils.get_all_stores()
+            if not stores.empty:
+                st.write(f"Found {len(stores)} stores in database")
+                # You would normally sync data here
+                st.success("Data sync would happen here!")
+            else:
+                st.warning("No stores found in database. Initialize database first.")
+                
+        except Exception as e:
+            st.error(f"❌ Error during sync: {str(e)}")
+    else:
+        st.error("❌ Cannot sync data - module not loaded")
+
+# DIAGNOSTICS SECTION
+st.markdown("---")
+st.header("Connection Diagnostics")
+
+# Try to connect to the database and show status
+if db_utils:
     try:
+        st.write("Attempting to connect to database...")
         conn = db_utils.get_db_connection()
         st.success("✅ Successfully connected to Supabase database")
         
-        # Add button to initialize database
-        if st.button("Initialize Database"):
-            try:
-                db_utils.create_database()
-                st.success("✅ Database tables created successfully")
-            except Exception as e:
-                st.error(f"❌ Error creating database tables: {str(e)}")
-        
-        # Get stores from database to see if we have any
+        # Get stores from database
         try:
             stores = db_utils.get_all_stores()
             if not stores.empty:
                 st.success(f"✅ Found {len(stores)} stores in database")
                 
-                # Add button to sync data
-                if st.button("Sync Data"):
-                    st.info("Data synchronization will be implemented soon")
+                # Show store details
+                st.write("Store details:")
+                for _, store in stores.iterrows():
+                    st.write(f"- {store['name']} (ID: {store['id']})")
             else:
                 st.warning("No stores found in database. Try initializing the database first.")
         except Exception as e:
@@ -87,6 +118,8 @@ if secrets_ok:
     except Exception as e:
         st.error(f"❌ Error connecting to database: {str(e)}")
         st.info("Please check your database credentials in the secrets configuration.")
+else:
+    st.error("❌ Cannot connect to database - module not loaded")
 
 # Footer
 st.markdown("---")
