@@ -1,7 +1,5 @@
 [server]
-headless = false
-openBrowserOnStart = true
+headless = true
 
 [browser]
-serverAddress = "localhost"
 gatherUsageStats = false 
