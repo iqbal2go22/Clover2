@@ -12,8 +12,24 @@ st.set_page_config(
 st.title("📊 Clover Executive Dashboard")
 st.write("Cloud version with Supabase database")
 
-# Display setup info
-st.header("Database Setup")
+# Simple error handler for imports
+def safe_import(module_name):
+    try:
+        module = __import__(module_name)
+        st.success(f"✅ Successfully imported {module_name}")
+        return module
+    except Exception as e:
+        st.error(f"❌ Error importing {module_name}: {str(e)}")
+        return None
+
+# Check if we can import needed modules
+db_utils = safe_import("cloud_db_utils")
+
+# If we couldn't import the module, show a clear error
+if not db_utils:
+    st.warning("The app cannot continue without required modules.")
+    st.info("Please check that all required Python modules are installed.")
+    st.stop()  # Stop execution to prevent further errors
 
 # Check if secrets are configured
 secrets_ok = False
@@ -38,13 +54,39 @@ if hasattr(st, 'secrets'):
 else:
     st.error("❌ No secrets configured")
 
-# Add simple buttons
+# Only attempt to use database if secrets are configured
 if secrets_ok:
-    if st.button("Initialize Database"):
-        st.info("Database initialization will be implemented in the next update")
-    
-    if st.button("Sync Data"):
-        st.info("Data synchronization will be implemented in the next update")
+    # Safely try to connect to the database
+    try:
+        conn = db_utils.get_db_connection()
+        st.success("✅ Successfully connected to Supabase database")
+        
+        # Add button to initialize database
+        if st.button("Initialize Database"):
+            try:
+                db_utils.create_database()
+                st.success("✅ Database tables created successfully")
+            except Exception as e:
+                st.error(f"❌ Error creating database tables: {str(e)}")
+        
+        # Get stores from database to see if we have any
+        try:
+            stores = db_utils.get_all_stores()
+            if not stores.empty:
+                st.success(f"✅ Found {len(stores)} stores in database")
+                
+                # Add button to sync data
+                if st.button("Sync Data"):
+                    st.info("Data synchronization will be implemented soon")
+            else:
+                st.warning("No stores found in database. Try initializing the database first.")
+        except Exception as e:
+            st.error(f"❌ Error getting stores: {str(e)}")
+        
+        conn.close()
+    except Exception as e:
+        st.error(f"❌ Error connecting to database: {str(e)}")
+        st.info("Please check your database credentials in the secrets configuration.")
 
 # Footer
 st.markdown("---")
