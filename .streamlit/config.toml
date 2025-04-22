@@ -1,0 +1,7 @@
+[server]
+headless = false
+openBrowserOnStart = true
+
+[browser]
+serverAddress = "localhost"
+gatherUsageStats = false 

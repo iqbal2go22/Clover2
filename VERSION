@@ -1,0 +1,3 @@
+VERSION=2.0
+LAST_UPDATED=2025-04-22
+FEATURES=multi-store-support,individual-store-cards,incremental-sync,optimized-queries 
