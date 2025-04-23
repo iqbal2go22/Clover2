@@ -9,23 +9,66 @@ from sqlalchemy import create_engine, text
 import datetime
 import streamlit as st
 import os
+import time
 
-# Supabase connection string - for development and testing
-# In production, this will be loaded from Streamlit secrets
-DATABASE_URL = "postgresql://postgres.yegrbbtxlsfbrlyavmbg:721AFFTNZmnQ3An7@yegrbbtxlsfbrlyavmbg.supabase.co:6543/postgres"
+# Supabase connection strings - for development and testing
+# In production, these will be loaded from Streamlit secrets
+# Connection pooling URL (port 6543)
+POOLING_URL = "postgresql://postgres.yegrbbtxlsfbrlyavmbg:721AFFTNZmnQ3An7@yegrbbtxlsfbrlyavmbg.supabase.co:6543/postgres"
+# Direct connection URL (port 5432)
+DIRECT_URL = "postgresql://postgres:721AFFTNZmnQ3An7@db.yegrbbtxlsfbrlyavmbg.supabase.co:5432/postgres"
 
-def get_db_connection():
-    """Get a database connection to Supabase PostgreSQL."""
-    if hasattr(st, 'secrets') and 'supabase' in st.secrets:
-        # Use the connection string from Streamlit secrets in production
-        database_url = st.secrets["supabase"]["url"]
-    else:
-        # Fall back to the hardcoded connection string for development
-        database_url = DATABASE_URL
+def get_db_connection(max_retries=3, retry_delay=1):
+    """
+    Get a database connection to Supabase PostgreSQL.
     
-    # Create a connection to the database
-    engine = create_engine(database_url)
-    return engine.connect()
+    This function will try the connection pooling URL first, then fall back to the direct connection
+    if that fails. It will retry up to max_retries times with a delay between attempts.
+    """
+    if hasattr(st, 'secrets') and 'supabase' in st.secrets:
+        # Use connection strings from Streamlit secrets in production
+        pooling_url = st.secrets["supabase"].get("pooling_url", st.secrets["supabase"]["url"])
+        direct_url = st.secrets["supabase"].get("direct_url", None)  # Use if provided
+    else:
+        # Fall back to hardcoded connection strings for development
+        pooling_url = POOLING_URL
+        direct_url = DIRECT_URL
+    
+    # Try connection pooling first (faster, more efficient)
+    for attempt in range(max_retries):
+        try:
+            # Create a connection to the database using connection pooling
+            engine = create_engine(pooling_url, connect_args={"connect_timeout": 10})
+            conn = engine.connect()
+            print(f"Connected to Supabase using connection pooling (attempt {attempt + 1})")
+            return conn
+        except Exception as e:
+            if "timeout" in str(e).lower() or "connection refused" in str(e).lower():
+                print(f"Connection pooling attempt {attempt + 1} failed with timeout: {str(e)}")
+                if attempt < max_retries - 1:
+                    time.sleep(retry_delay)
+                    continue
+            else:
+                # Other error that's not a timeout
+                print(f"Connection pooling error (non-timeout): {str(e)}")
+                break  # Try direct connection
+    
+    # If connection pooling fails or direct_url is None, try direct connection
+    if direct_url:
+        for attempt in range(max_retries):
+            try:
+                # Try direct connection as a fallback
+                engine = create_engine(direct_url, connect_args={"connect_timeout": 15})
+                conn = engine.connect()
+                print(f"Connected to Supabase using direct connection (attempt {attempt + 1})")
+                return conn
+            except Exception as e:
+                print(f"Direct connection attempt {attempt + 1} failed: {str(e)}")
+                if attempt < max_retries - 1:
+                    time.sleep(retry_delay)
+                
+    # If we get here, both connection methods failed
+    raise Exception("Failed to connect to Supabase database after multiple attempts")
 
 def create_database():
     """Create the necessary tables in the database if they don't exist."""
@@ -35,7 +78,7 @@ def create_database():
         # Create stores table
         conn.execute(text("""
         CREATE TABLE IF NOT EXISTS stores (
-            id INTEGER PRIMARY KEY,
+            id SERIAL PRIMARY KEY,
             name TEXT NOT NULL,
             merchant_id TEXT NOT NULL,
             api_key TEXT,
@@ -89,6 +132,9 @@ def create_database():
             items_count INTEGER
         )
         """))
+        
+        # Commit the transaction
+        conn.commit()
     finally:
         conn.close()
 
