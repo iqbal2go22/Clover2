@@ -5,4 +5,6 @@ plotly==5.18.0
 sqlalchemy==2.0.27
 psycopg2-binary==2.9.9
 toml==0.10.2
-tqdm==4.66.1 
+tqdm==4.66.1
+supabase==2.4.0
+streamlit-supabase-auth==0.2.2 
