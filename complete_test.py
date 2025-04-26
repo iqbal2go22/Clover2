@@ -13,14 +13,62 @@ st.write("This app tests the entire flow: Clover API → Supabase → Display")
 # Step 1: Set up connections
 st.header("1. Setting Up Connections")
 
-# Supabase credentials
-supabase_project_url = "https://yegrbbtxlsfbrlyavmbg.supabase.co"
-supabase_anon_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InllZ3JiYnR4bHNmYnJseWF2bWJnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUzNDEzMTksImV4cCI6MjA2MDkxNzMxOX0.WsdfCwJd9dJ305uzmYcENHpspi_SFKVf71UKuZKCGaY"
-supabase_service_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InllZ3JiYnR4bHNmYnJseWF2bWJnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NTM0MTMxOSwiZXhwIjoyMDYwOTE3MzE5fQ.2A5WSRFBG-9ufAutAUm1fwZ44w-NGxuTRCg-n3y5tUo"
+# Get Supabase credentials from secrets
+try:
+    # Try connections.supabase format first (preferred)
+    if 'connections' in st.secrets and 'supabase' in st.secrets.connections:
+        supabase_project_url = st.secrets.connections.supabase.project_url
+        supabase_anon_key = st.secrets.connections.supabase.api_key
+        st.write("✅ Found Supabase credentials in connections.supabase format")
+    else:
+        # Fall back to direct format if needed
+        supabase_project_url = st.secrets.supabase.url
+        supabase_anon_key = st.secrets.supabase.api_key
+        st.write("✅ Found Supabase credentials in direct format")
+    
+    # Get service role key (for admin operations)
+    if 'connections' in st.secrets and 'supabase_admin' in st.secrets.connections:
+        supabase_service_key = st.secrets.connections.supabase_admin.api_key
+        st.write("✅ Found Supabase admin credentials")
+    elif 'connections' in st.secrets and hasattr(st.secrets.connections.supabase, 'service_role_key'):
+        supabase_service_key = st.secrets.connections.supabase.service_role_key
+        st.write("✅ Found service_role_key in connections.supabase")
+    elif hasattr(st.secrets, 'supabase') and hasattr(st.secrets.supabase, 'service_role_key'):
+        supabase_service_key = st.secrets.supabase.service_role_key
+        st.write("✅ Found service_role_key in direct format")
+    else:
+        st.error("❌ Could not find Supabase service role key in secrets")
+        supabase_service_key = "missing"
+        
+except Exception as e:
+    st.error(f"❌ Error loading Supabase credentials: {str(e)}")
+    st.write("Showing full secrets structure for debugging:")
+    # Show available sections in secrets (no actual values)
+    if hasattr(st, 'secrets'):
+        sections = []
+        for section in dir(st.secrets):
+            if not section.startswith('_'):
+                sections.append(section)
+        st.write(f"Available sections in secrets: {sections}")
+    st.stop()
 
-# Clover credentials for Laurel store
-laurel_merchant_id = "4VZSM7038BKQ1"
-laurel_access_token = "b9f678d7-9b27-e971-d9e4-feab8b227c96"
+# Get Clover credentials from secrets
+try:
+    # Look for store_1 (Laurel)
+    if 'store_1' in st.secrets:
+        store = st.secrets.store_1
+        laurel_name = store.name
+        laurel_merchant_id = store.merchant_id
+        laurel_access_token = store.access_token
+        st.write(f"✅ Found Clover credentials for {laurel_name}")
+    else:
+        # Fallback to hardcoded values for testing
+        st.warning("⚠️ Using fallback Clover credentials (not from secrets)")
+        laurel_merchant_id = "4VZSM7038BKQ1"
+        laurel_access_token = "b9f678d7-9b27-e971-d9e4-feab8b227c96"
+except Exception as e:
+    st.error(f"❌ Error loading Clover credentials: {str(e)}")
+    st.stop()
 
 # Create status columns
 col1, col2 = st.columns(2)
