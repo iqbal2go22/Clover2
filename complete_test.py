@@ -86,19 +86,16 @@ def fetch_clover_data(merchant_id, access_token, days=2):
         'Content-Type': 'application/json'
     }
     
-    # Fetch payments with order information - use millisecond timestamps
+    # Fetch payments with order information
     payments_url = f"{base_url}/merchants/{merchant_id}/payments"
     
-    # Fix filter format to match Clover API requirements
-    filter_query = f"createdTime>={start_ms}&createdTime<={end_ms}"
-    
+    # Just use the fallback method since it works reliably
     params = {
-        'filter': filter_query,
-        'expand': 'order',
-        'limit': 5  # Limit to 5 for quick testing
+        'limit': 10,
+        'expand': 'order'
     }
     
-    st.write(f"API URL: {payments_url}?filter={filter_query}&expand=order&limit=5")
+    st.write(f"Fetching recent payments without date filter")
     
     try:
         # Get payments
@@ -106,30 +103,18 @@ def fetch_clover_data(merchant_id, access_token, days=2):
         
         # Show response status for debugging
         st.write(f"Response status: {response.status_code}")
-        if response.status_code != 200:
-            st.write(f"Error response: {response.text}")
         
         response.raise_for_status()
         data = response.json()
         
-        return data.get('elements', [])
+        # If we need to filter by date, we can do it client-side
+        elements = data.get('elements', [])
+        st.write(f"Successfully fetched {len(elements)} payments")
+        
+        return elements
     except Exception as e:
         st.error(f"Error fetching from Clover API: {str(e)}")
-        
-        # Alternative approach - try without filter
-        st.write("Trying alternative approach without date filter...")
-        try:
-            simple_params = {
-                'limit': 5,
-                'expand': 'order'
-            }
-            response = requests.get(payments_url, headers=headers, params=simple_params)
-            response.raise_for_status()
-            data = response.json()
-            return data.get('elements', [])
-        except Exception as e2:
-            st.error(f"Second attempt also failed: {str(e2)}")
-            return []
+        return []
 
 # Fetch data button
 if st.button("Fetch Data from Clover"):
