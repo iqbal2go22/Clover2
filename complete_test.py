@@ -220,22 +220,47 @@ def save_to_supabase(data, table="payments"):
         "Prefer": "return=representation"
     }
     
-    # Use the existing payments table
-    url = f"{supabase_project_url}/rest/v1/{table}"
+    # First check if the payment already exists
+    payment_id = data[0]['payment_id']
+    check_url = f"{supabase_project_url}/rest/v1/{table}?payment_id=eq.{payment_id}"
+    check_response = requests.get(check_url, headers=supabase_headers)
     
-    # No need to create test table since we're using the existing payments table
+    if check_response.status_code == 200 and len(check_response.json()) > 0:
+        # Payment already exists, this is OK
+        st.warning(f"Payment {payment_id} already exists in the database. Using existing record.")
+        return check_response.json()
+    
+    # Payment doesn't exist, insert it
+    url = f"{supabase_project_url}/rest/v1/{table}"
     
     # Insert data
     st.write(f"Saving to table: {table}")
-    response = requests.post(url, headers=supabase_headers, json=data)
-    
-    # Log any error details
-    if response.status_code != 200:
-        st.error(f"Error response: {response.text}")
+    try:
+        response = requests.post(url, headers=supabase_headers, json=data)
         
-    response.raise_for_status()
-    
-    return response.json()
+        # Handle possible errors
+        if response.status_code != 200 and response.status_code != 201:
+            st.error(f"Error response: {response.text}")
+            
+            # Special handling for duplicate key errors (this is actually OK)
+            if response.status_code == 409 and "duplicate key" in response.text:
+                st.warning("Payment record already exists (duplicate key). Using existing record.")
+                # Get the existing record
+                existing_response = requests.get(check_url, headers=supabase_headers)
+                if existing_response.status_code == 200:
+                    return existing_response.json()
+            
+        # For other errors, raise an exception
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        # Last attempt - check if the error was just a duplicate key issue
+        if "duplicate key" in str(e):
+            st.warning("Payment record already exists. Using existing record.")
+            existing_response = requests.get(check_url, headers=supabase_headers)
+            if existing_response.status_code == 200:
+                return existing_response.json()
+        raise e
 
 # Process and save button - only show if we have payments
 if 'payments' in st.session_state and st.session_state.payments:
