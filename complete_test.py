@@ -147,22 +147,28 @@ def process_payments(merchant_id, payments):
         order_id = payment.get('order', {}).get('id')
         amount = payment.get('amount')
         created_time = payment.get('createdTime')
+        employee_id = payment.get('employee', {}).get('id', '')
+        device_id = payment.get('device', {}).get('id', '')
+        tender_type = payment.get('tender', {}).get('label', 'cash')
+        card_type = payment.get('cardTransaction', {}).get('cardType', '')
+        last_4 = payment.get('cardTransaction', {}).get('last4', '')
         
         if payment_id and amount is not None and created_time:
             # Convert timestamp to datetime
             created_at = datetime.datetime.fromtimestamp(created_time / 1000)
             
-            # Create a test ID for this specific test that we'll use to retrieve later
-            test_id = f"test_{uuid.uuid4().hex[:8]}_{payment_id}"
-            
-            # Format for Supabase
+            # Format for Supabase - use the correct schema
             payment_data = {
-                'id': test_id,  # Use a test ID to avoid conflicts with existing data
                 'payment_id': payment_id,
-                'merchant_id': merchant_id,
-                'order_id': order_id,
+                'store_id': merchant_id,
                 'amount': amount,
                 'created_time': created_at.isoformat(),
+                'employee_id': employee_id,
+                'order_id': order_id,
+                'device_id': device_id,
+                'tender_type': tender_type,
+                'card_type': card_type,
+                'last_4': last_4,
                 'sync_date': datetime.datetime.now().isoformat()
             }
             payments_processed.append(payment_data)
@@ -235,7 +241,8 @@ def get_from_supabase(payment_id, table="payments"):
         "Content-Type": "application/json"
     }
     
-    url = f"{supabase_project_url}/rest/v1/{table}?id=eq.{payment_id}"
+    # Use payment_id, not id
+    url = f"{supabase_project_url}/rest/v1/{table}?payment_id=eq.{payment_id}"
     response = requests.get(url, headers=supabase_headers)
     response.raise_for_status()
     
@@ -245,7 +252,7 @@ def get_from_supabase(payment_id, table="payments"):
 if 'saved_payment' in st.session_state:
     if st.button("Retrieve from Supabase"):
         with st.spinner("Retrieving payment from Supabase..."):
-            payment_id = st.session_state.saved_payment['id']
+            payment_id = st.session_state.saved_payment['payment_id']
             
             try:
                 retrieved_data = get_from_supabase(payment_id)
