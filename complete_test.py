@@ -75,9 +75,9 @@ def fetch_clover_data(merchant_id, access_token, days=2):
     end_date = datetime.datetime.now()
     start_date = end_date - datetime.timedelta(days=days)
     
-    # Format dates for Clover API
-    start_str = start_date.strftime("%Y-%m-%dT00:00:00.000Z")
-    end_str = end_date.strftime("%Y-%m-%dT23:59:59.999Z")
+    # Format dates for Clover API - use millisecond timestamps instead of ISO strings
+    start_ms = int(start_date.timestamp() * 1000)
+    end_ms = int(end_date.timestamp() * 1000)
     
     # Set up API request
     base_url = "https://api.clover.com/v3"
@@ -86,20 +86,50 @@ def fetch_clover_data(merchant_id, access_token, days=2):
         'Content-Type': 'application/json'
     }
     
-    # Fetch payments with order information
+    # Fetch payments with order information - use millisecond timestamps
     payments_url = f"{base_url}/merchants/{merchant_id}/payments"
+    
+    # Fix filter format to match Clover API requirements
+    filter_query = f"createdTime>={start_ms}&createdTime<={end_ms}"
+    
     params = {
-        'filter': f'createdTime>={start_str} and createdTime<={end_str}',
+        'filter': filter_query,
         'expand': 'order',
         'limit': 5  # Limit to 5 for quick testing
     }
     
-    # Get payments
-    response = requests.get(payments_url, headers=headers, params=params)
-    response.raise_for_status()
-    data = response.json()
+    st.write(f"API URL: {payments_url}?filter={filter_query}&expand=order&limit=5")
     
-    return data.get('elements', [])
+    try:
+        # Get payments
+        response = requests.get(payments_url, headers=headers, params=params)
+        
+        # Show response status for debugging
+        st.write(f"Response status: {response.status_code}")
+        if response.status_code != 200:
+            st.write(f"Error response: {response.text}")
+        
+        response.raise_for_status()
+        data = response.json()
+        
+        return data.get('elements', [])
+    except Exception as e:
+        st.error(f"Error fetching from Clover API: {str(e)}")
+        
+        # Alternative approach - try without filter
+        st.write("Trying alternative approach without date filter...")
+        try:
+            simple_params = {
+                'limit': 5,
+                'expand': 'order'
+            }
+            response = requests.get(payments_url, headers=headers, params=simple_params)
+            response.raise_for_status()
+            data = response.json()
+            return data.get('elements', [])
+        except Exception as e2:
+            st.error(f"Second attempt also failed: {str(e2)}")
+            return []
 
 # Fetch data button
 if st.button("Fetch Data from Clover"):
