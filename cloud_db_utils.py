@@ -13,64 +13,51 @@ import time
 import json
 import requests
 
-# Supabase connection strings - for development and testing
-# In production, these will be loaded from Streamlit secrets
-# Connection pooling URL (port 6543)
-POOLING_URL = "postgresql://postgres.yegrbbtxlsfbrlyavmbg:721AFFTNZmnQ3An7@yegrbbtxlsfbrlyavmbg.supabase.co:6543/postgres"
-# Direct connection URL (port 5432)
-DIRECT_URL = "postgresql://postgres:721AFFTNZmnQ3An7@db.yegrbbtxlsfbrlyavmbg.supabase.co:5432/postgres"
-
 def get_db_connection(max_retries=3, retry_delay=1):
     """
     Get a database connection to Supabase PostgreSQL.
     
-    This function will try the connection pooling URL first, then fall back to the direct connection
-    if that fails. It will retry up to max_retries times with a delay between attempts.
+    This function will try to connect to Supabase using connection details from
+    Streamlit secrets. It will retry up to max_retries times with a delay between attempts.
     """
-    if hasattr(st, 'secrets') and 'supabase' in st.secrets:
-        # Use connection strings from Streamlit secrets in production
-        pooling_url = st.secrets["supabase"].get("pooling_url", st.secrets["supabase"]["url"])
-        direct_url = st.secrets["supabase"].get("direct_url", None)  # Use if provided
-    else:
-        # Fall back to hardcoded connection strings for development
-        pooling_url = POOLING_URL
-        direct_url = DIRECT_URL
+    if not hasattr(st, 'secrets') or 'connections' not in st.secrets or 'supabase' not in st.secrets.connections:
+        raise Exception("Supabase connection details not found in Streamlit secrets")
     
-    # Try connection pooling first (faster, more efficient)
+    # Get connection details from secrets
+    project_url = st.secrets.connections.supabase.get("project_url")
+    api_key = st.secrets.connections.supabase.get("api_key")
+    
+    if not project_url or not api_key:
+        raise Exception("Incomplete Supabase connection details in secrets")
+    
+    # Extract project ID from URL for forming connection string
+    project_id = project_url.split("//")[1].split(".")[0]
+    
+    # Form connection string - use REST API exclusively instead of direct PostgreSQL
+    # We'll use the REST API wrapped functions below instead
     for attempt in range(max_retries):
         try:
-            # Create a connection to the database using connection pooling
-            engine = create_engine(pooling_url, connect_args={"connect_timeout": 10})
-            conn = engine.connect()
-            print(f"Connected to Supabase using connection pooling (attempt {attempt + 1})")
-            return conn
+            # Just validate connection details are correct by making a simple request
+            headers = {
+                "apikey": api_key,
+                "Authorization": f"Bearer {api_key}"
+            }
+            test_url = f"{project_url}/rest/v1/sync_log?limit=1"
+            response = requests.get(test_url, headers=headers, timeout=10)
+            response.raise_for_status()
+            
+            # Return connection details as a simple dict
+            return {
+                "project_url": project_url,
+                "api_key": api_key,
+                "headers": headers
+            }
         except Exception as e:
-            if "timeout" in str(e).lower() or "connection refused" in str(e).lower():
-                print(f"Connection pooling attempt {attempt + 1} failed with timeout: {str(e)}")
-                if attempt < max_retries - 1:
-                    time.sleep(retry_delay)
-                    continue
+            print(f"Connection attempt {attempt + 1} failed: {str(e)}")
+            if attempt < max_retries - 1:
+                time.sleep(retry_delay)
             else:
-                # Other error that's not a timeout
-                print(f"Connection pooling error (non-timeout): {str(e)}")
-                break  # Try direct connection
-    
-    # If connection pooling fails or direct_url is None, try direct connection
-    if direct_url:
-        for attempt in range(max_retries):
-            try:
-                # Try direct connection as a fallback
-                engine = create_engine(direct_url, connect_args={"connect_timeout": 15})
-                conn = engine.connect()
-                print(f"Connected to Supabase using direct connection (attempt {attempt + 1})")
-                return conn
-            except Exception as e:
-                print(f"Direct connection attempt {attempt + 1} failed: {str(e)}")
-                if attempt < max_retries - 1:
-                    time.sleep(retry_delay)
-                
-    # If we get here, both connection methods failed
-    raise Exception("Failed to connect to Supabase database after multiple attempts")
+                raise Exception(f"Failed to connect to Supabase after {max_retries} attempts")
 
 def create_database():
     """Create the necessary tables in the database if they don't exist."""
@@ -735,22 +722,26 @@ def execute_raw_query(query_text, params=None):
 def get_supabase_client():
     """Get Supabase connection details from secrets"""
     if not hasattr(st.session_state, "supabase_client"):
-        # Get connection details from secrets
-        project_url = st.secrets.connections.supabase.get("project_url")
-        api_key = st.secrets.connections.supabase.get("api_key")
-        
-        # Set up headers for Supabase REST API
-        headers = {
-            "apikey": api_key,
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-            "Prefer": "return=representation"
-        }
-        
-        st.session_state.supabase_client = {
-            "project_url": project_url,
-            "headers": headers
-        }
+        try:
+            # Get connection details from secrets
+            project_url = st.secrets.connections.supabase.get("project_url")
+            api_key = st.secrets.connections.supabase.get("api_key")
+            
+            # Set up headers for Supabase REST API
+            headers = {
+                "apikey": api_key,
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+                "Prefer": "return=representation"
+            }
+            
+            st.session_state.supabase_client = {
+                "project_url": project_url,
+                "headers": headers
+            }
+        except Exception as e:
+            st.error(f"Failed to initialize Supabase client: {str(e)}")
+            raise
     
     return st.session_state.supabase_client
 
@@ -989,4 +980,332 @@ def get_last_sync():
     results = execute_query("sync_log?order=sync_time.desc&limit=1")
     if results and len(results) > 0:
         return results[0]
-    return None 
+    return None
+
+# Clover API Integration Functions
+def fetch_clover_data(merchant_id, access_token, start_date, end_date):
+    """
+    Fetch payment data from Clover API for a specific merchant and date range.
+    
+    Args:
+        merchant_id: The Clover merchant ID
+        access_token: The Clover access token
+        start_date: Start date for data retrieval
+        end_date: End date for data retrieval
+        
+    Returns:
+        Dictionary containing payments and order data
+    """
+    # Format dates for Clover API
+    start_str = start_date.strftime("%Y-%m-%dT00:00:00.000Z")
+    end_str = end_date.strftime("%Y-%m-%dT23:59:59.999Z")
+    
+    # Base URL for Clover API
+    base_url = "https://api.clover.com/v3"
+    
+    # Headers for authorization
+    headers = {
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'application/json'
+    }
+    
+    # Fetch payments
+    payments_url = f"{base_url}/merchants/{merchant_id}/payments"
+    params = {
+        'filter': f'createdTime>={start_str} and createdTime<={end_str}',
+        'expand': 'order',
+        'limit': 1000  # Maximum allowed by Clover API
+    }
+    
+    all_payments = []
+    has_more = True
+    offset = 0
+    
+    # Paginate through all results
+    while has_more:
+        params['offset'] = offset
+        try:
+            response = requests.get(payments_url, headers=headers, params=params)
+            response.raise_for_status()
+            data = response.json()
+            
+            if 'elements' in data:
+                payments = data['elements']
+                all_payments.extend(payments)
+                
+                # Check if there are more pages
+                if len(payments) < 1000:
+                    has_more = False
+                else:
+                    offset += 1000
+            else:
+                has_more = False
+        except Exception as e:
+            st.error(f"Error fetching payments from Clover API: {str(e)}")
+            break
+    
+    # Get order items for all orders
+    order_items = []
+    order_ids = set()
+    
+    # Extract unique order IDs from payments
+    for payment in all_payments:
+        if 'order' in payment and payment['order'] and 'id' in payment['order']:
+            order_ids.add(payment['order']['id'])
+    
+    # Fetch line items for each order
+    for order_id in order_ids:
+        try:
+            items_url = f"{base_url}/merchants/{merchant_id}/orders/{order_id}/line_items"
+            response = requests.get(items_url, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            
+            if 'elements' in data:
+                for item in data['elements']:
+                    item['orderId'] = order_id
+                    order_items.append(item)
+        except Exception as e:
+            st.error(f"Error fetching order items for order {order_id}: {str(e)}")
+    
+    return {
+        'payments': all_payments,
+        'order_items': order_items
+    }
+
+def process_and_save_clover_data(store_id, clover_data):
+    """
+    Process and save Clover data to Supabase.
+    
+    Args:
+        store_id: Merchant ID for the store
+        clover_data: Dictionary containing payments and order_items from Clover API
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        # Process payments
+        payments_processed = []
+        for payment in clover_data['payments']:
+            # Extract payment data
+            payment_id = payment.get('id')
+            order_id = payment.get('order', {}).get('id')
+            amount = payment.get('amount')
+            created_time = payment.get('createdTime')
+            
+            if payment_id and amount is not None and created_time:
+                # Convert timestamp to datetime
+                created_at = datetime.datetime.fromtimestamp(created_time / 1000)
+                
+                # Format for Supabase
+                payment_data = {
+                    'id': payment_id,
+                    'merchant_id': store_id,
+                    'order_id': order_id,
+                    'amount': amount,
+                    'created_at': created_at.isoformat()
+                }
+                payments_processed.append(payment_data)
+        
+        # Process order items
+        items_processed = []
+        for item in clover_data['order_items']:
+            item_id = item.get('id')
+            order_id = item.get('orderId')
+            name = item.get('name')
+            price = item.get('price')
+            quantity = item.get('quantity', 1)
+            
+            if item_id and order_id:
+                # Format for Supabase
+                item_data = {
+                    'id': item_id,
+                    'merchant_id': store_id,
+                    'order_id': order_id,
+                    'name': name,
+                    'price': price / 100 if price else 0,  # Convert cents to dollars
+                    'quantity': quantity,
+                    'created_at': datetime.datetime.now().isoformat()  # Use current time as fallback
+                }
+                items_processed.append(item_data)
+        
+        # Save to Supabase
+        if payments_processed:
+            save_payments(payments_processed)
+        
+        if items_processed:
+            save_order_items(items_processed)
+        
+        # Update sync log
+        sync_time = datetime.datetime.now()
+        add_sync_log("completed", f"Synced {len(payments_processed)} payments and {len(items_processed)} order items")
+        
+        return True
+    
+    except Exception as e:
+        st.error(f"Error processing and saving Clover data: {str(e)}")
+        # Log the error
+        add_sync_log("failed", str(e))
+        return False
+
+def sync_clover_data(store_id=None, start_date=None, end_date=None):
+    """
+    Main function to sync data from Clover API to Supabase.
+    
+    Args:
+        store_id: Specific store ID to sync, or None for all stores
+        start_date: Start date for data sync
+        end_date: End date for data sync
+        
+    Returns:
+        Dict with success status and message
+    """
+    if start_date is None:
+        # Default to 30 days ago
+        start_date = datetime.datetime.now() - datetime.timedelta(days=30)
+    
+    if end_date is None:
+        end_date = datetime.datetime.now()
+    
+    # Get stores to sync
+    try:
+        # Track overall sync results
+        results = {
+            "total_stores": 0,
+            "successful_stores": 0,
+            "failed_stores": 0,
+            "total_payments": 0,
+            "total_order_items": 0
+        }
+        
+        # Get stores to sync - either specific store or all stores
+        stores = []
+        if store_id:
+            # Get specific store
+            store = get_store_by_merchant_id(store_id)
+            if store:
+                stores = [store]
+            else:
+                # Store not found in database, check if we have it in secrets
+                if hasattr(st, 'secrets'):
+                    for key in st.secrets:
+                        # Look for any key that might be a store config
+                        if key.startswith('store_') or 'store' in key:
+                            store_config = st.secrets[key]
+                            if isinstance(store_config, dict) and 'merchant_id' in store_config:
+                                if store_config['merchant_id'] == store_id:
+                                    stores = [{
+                                        'merchant_id': store_config['merchant_id'],
+                                        'name': store_config.get('name', f"Store {store_id}"),
+                                        'access_token': store_config.get('access_token')
+                                    }]
+                                    break
+                
+                if not stores:
+                    return {"success": False, "message": f"Store with ID {store_id} not found"}
+        else:
+            # Get all stores from database
+            stores_df = get_all_stores()
+            if not stores_df.empty:
+                stores = stores_df.to_dict('records')
+            
+            # Also check secrets for any additional stores
+            if hasattr(st, 'secrets'):
+                merchant_ids = set(store['merchant_id'] for store in stores) if stores else set()
+                
+                for key in st.secrets:
+                    if key.startswith('store_') or 'store' in key:
+                        store_config = st.secrets[key]
+                        if isinstance(store_config, dict) and 'merchant_id' in store_config:
+                            # Only add if not already in the list
+                            if store_config['merchant_id'] not in merchant_ids:
+                                stores.append({
+                                    'merchant_id': store_config['merchant_id'],
+                                    'name': store_config.get('name', f"Store {len(stores)+1}"),
+                                    'access_token': store_config.get('access_token')
+                                })
+                                merchant_ids.add(store_config['merchant_id'])
+            
+            if not stores:
+                return {"success": False, "message": "No stores found in database or secrets"}
+        
+        results["total_stores"] = len(stores)
+        
+        # Sync each store
+        for store in stores:
+            merchant_id = store['merchant_id']
+            access_token = store.get('access_token')
+            
+            # If access token not in store record, check secrets
+            if not access_token:
+                # First check for direct store reference
+                store_key = f"store_{merchant_id}"
+                if hasattr(st, 'secrets') and store_key in st.secrets:
+                    access_token = st.secrets[store_key].get('access_token')
+                else:
+                    # Check all store configs
+                    for key in st.secrets:
+                        if key.startswith('store_') or 'store' in key:
+                            store_config = st.secrets[key]
+                            if isinstance(store_config, dict) and store_config.get('merchant_id') == merchant_id:
+                                access_token = store_config.get('access_token')
+                                break
+                
+                # Numbered store format (store_1, store_2, etc)
+                if not access_token:
+                    for i in range(1, 20):  # Check up to 20 stores
+                        store_key = f'store_{i}'
+                        if hasattr(st, 'secrets') and store_key in st.secrets:
+                            if st.secrets[store_key].get('merchant_id') == merchant_id:
+                                access_token = st.secrets[store_key].get('access_token')
+                                break
+            
+            if not access_token:
+                st.warning(f"No access token found for store {store.get('name', merchant_id)}")
+                results["failed_stores"] += 1
+                continue
+            
+            # Fetch data from Clover API
+            try:
+                clover_data = fetch_clover_data(merchant_id, access_token, start_date, end_date)
+                
+                # Process and save data
+                if clover_data['payments'] or clover_data['order_items']:
+                    success = process_and_save_clover_data(merchant_id, clover_data)
+                    
+                    if success:
+                        results["successful_stores"] += 1
+                        results["total_payments"] += len(clover_data['payments'])
+                        results["total_order_items"] += len(clover_data['order_items'])
+                        
+                        # Update store's last sync date
+                        update_store_last_sync(merchant_id)
+                    else:
+                        results["failed_stores"] += 1
+                else:
+                    # No data found but not an error
+                    st.info(f"No new data found for store {store.get('name', merchant_id)}")
+                    results["successful_stores"] += 1
+            except Exception as e:
+                st.error(f"Error syncing store {store.get('name', merchant_id)}: {str(e)}")
+                results["failed_stores"] += 1
+        
+        # Overall success if at least one store synced successfully
+        success = results["successful_stores"] > 0
+        
+        # Create summary message
+        message = f"Synced {results['total_payments']} payments from {results['successful_stores']} stores"
+        if results["failed_stores"] > 0:
+            message += f" ({results['failed_stores']} stores failed)"
+        
+        return {
+            "success": success,
+            "message": message,
+            "results": results
+        }
+        
+    except Exception as e:
+        error_message = f"Error syncing Clover data: {str(e)}"
+        add_sync_log("failed", error_message)
+        return {"success": False, "message": error_message} 

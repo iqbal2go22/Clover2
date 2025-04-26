@@ -89,6 +89,23 @@ with st.sidebar:
     # Get all stores
     try:
         stores_df = db_utils.get_all_stores()
+        
+        # If no stores in database, check if we have store configs in secrets
+        if stores_df.empty and hasattr(st, 'secrets'):
+            store_records = []
+            
+            for key in st.secrets:
+                if key.startswith('store_') or 'store' in key:
+                    store_config = st.secrets[key]
+                    if isinstance(store_config, dict) and 'merchant_id' in store_config and 'name' in store_config:
+                        store_records.append({
+                            'merchant_id': store_config['merchant_id'],
+                            'name': store_config['name']
+                        })
+            
+            if store_records:
+                stores_df = pd.DataFrame(store_records)
+                st.info("Loaded store configurations from secrets (not yet in database)")
     except Exception as e:
         st.error(f"Error loading stores: {str(e)}")
         stores_df = pd.DataFrame()
@@ -117,16 +134,28 @@ with st.sidebar:
                 end_date = datetime.now()
                 
                 # Add a spinner to show progress
-                with st.spinner("Syncing data..."):
-                    # Code to sync data would go here
-                    # This would call your sync function with the start/end dates
-                    time.sleep(2)  # Simulating work being done
+                with st.spinner("Syncing data from Clover API..."):
+                    # Call the sync function
+                    sync_result = db_utils.sync_clover_data(store_id, start_date, end_date)
                     
-                st.success("✅ Data sync completed!")
+                if sync_result["success"]:
+                    st.success(f"✅ {sync_result['message']}")
+                    
+                    # Add more detailed results if available
+                    if "results" in sync_result:
+                        with st.expander("Sync Details"):
+                            st.write(f"Total stores processed: {sync_result['results']['total_stores']}")
+                            st.write(f"Successful stores: {sync_result['results']['successful_stores']}")
+                            st.write(f"Failed stores: {sync_result['results']['failed_stores']}")
+                            st.write(f"Total payments synced: {sync_result['results']['total_payments']}")
+                            st.write(f"Total order items synced: {sync_result['results']['total_order_items']}")
+                else:
+                    st.error(f"❌ {sync_result['message']}")
             except Exception as e:
                 st.error(f"❌ Error during sync: {str(e)}")
+                st.write("Check connection to Supabase and Clover API credentials")
     else:
-        st.warning("No stores found in database. Please set up your stores first.")
+        st.warning("No stores found in database. Please set up your stores in the Streamlit secrets.")
         store_id = None
 
 # MAIN CONTENT
