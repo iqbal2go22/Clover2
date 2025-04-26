@@ -4,11 +4,50 @@ import json
 import datetime
 import pandas as pd
 import time
-import uuid
+import uuid  # This is part of Python's standard library
+import sys
+import os
 
-st.set_page_config(page_title="Complete End-to-End Test", layout="wide")
+st.set_page_config(page_title="Complete End-to-End Test", layout="wide", page_icon="🔄")
 st.title("🔄 Complete End-to-End Test")
 st.write("This app tests the entire flow: Clover API → Supabase → Display")
+
+# Add version info to help with debugging
+st.sidebar.markdown("### Debug Info")
+st.sidebar.write(f"Streamlit version: {st.__version__}")
+st.sidebar.write(f"Python version: {sys.version}")
+
+# Add page selection for more robust testing
+test_page = st.sidebar.radio(
+    "Select Test Page",
+    ["Full End-to-End Test", "Connection Test Only", "View Config"]
+)
+
+if test_page == "View Config":
+    st.header("Configuration Info")
+    # Check if secrets exist
+    if hasattr(st, 'secrets'):
+        sections = []
+        for section in dir(st.secrets):
+            if not section.startswith('_'):
+                sections.append(section)
+        st.write(f"✅ Secrets are configured with sections: {sections}")
+    else:
+        st.error("❌ No secrets configuration found!")
+    
+    # Show environment info
+    st.subheader("Environment Information")
+    st.json({
+        "streamlit_version": st.__version__,
+        "python_version": sys.version,
+        "running_on_cloud": "STREAMLIT_SHARING_MODE" in os.environ
+    })
+    st.stop()
+
+if test_page == "Connection Test Only":
+    st.header("Connection Test")
+    # Rest of your connection test code...
+    st.stop()
 
 # Step 1: Set up connections
 st.header("1. Setting Up Connections")
