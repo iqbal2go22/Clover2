@@ -16,6 +16,28 @@ st.write("This app tests the entire flow: Clover API → Supabase → Display")
 st.sidebar.markdown("### Version Info")
 st.sidebar.write(f"Streamlit: {st.__version__}")
 
+# Add option to manually enter credentials
+with st.sidebar.expander("Manual Credentials", expanded=False):
+    st.info("Enter connection details if secrets are not configured")
+    
+    # Supabase manual credentials
+    st.subheader("Supabase")
+    manual_supabase_url = st.text_input("Supabase URL", 
+                                        value="https://yegrbbtxlsfbrlyavmbg.supabase.co", 
+                                        type="default")
+    manual_supabase_key = st.text_input("Supabase Key", 
+                                       value="", 
+                                       type="password")
+    
+    # Clover manual credentials
+    st.subheader("Clover")
+    manual_merchant_id = st.text_input("Merchant ID", 
+                                      value="4VZSM7038BKQ1", 
+                                      type="default")
+    manual_access_token = st.text_input("Access Token", 
+                                       value="", 
+                                       type="password")
+
 # IMPORTANT: All logic is now inside button clicks, so the app loads immediately
 st.header("Step 1: Test Connections")
 
@@ -24,15 +46,40 @@ if st.button("Test Supabase Connection"):
     st.write("Testing Supabase connection...")
     
     try:
-        # Get credentials from secrets
-        if 'connections' in st.secrets and 'supabase' in st.secrets.connections:
-            project_url = st.secrets.connections.supabase.project_url
-            api_key = st.secrets.connections.supabase.api_key
-            st.success("✅ Found Supabase credentials!")
+        # Try to get credentials from several sources in order of preference:
+        # 1. Streamlit secrets
+        # 2. Manual input
+        
+        # Check if secrets are configured
+        if hasattr(st, 'secrets') and (
+            ('connections' in st.secrets and 'supabase' in st.secrets.connections) or
+            hasattr(st.secrets, 'supabase')
+        ):
+            # Secrets are available, try to use them
+            if 'connections' in st.secrets and 'supabase' in st.secrets.connections:
+                project_url = st.secrets.connections.supabase.get("project_url")
+                api_key = st.secrets.connections.supabase.get("api_key")
+                st.success("✅ Found Supabase credentials in secrets!")
+            else:
+                project_url = getattr(st.secrets.supabase, 'url', None)
+                api_key = getattr(st.secrets.supabase, 'api_key', None) or getattr(st.secrets.supabase, 'key', None)
+                if project_url and api_key:
+                    st.success("✅ Found Supabase credentials in secrets (direct format)!")
+                else:
+                    st.warning("⚠️ Incomplete Supabase credentials in secrets. Trying manual input...")
+                    project_url = manual_supabase_url
+                    api_key = manual_supabase_key
         else:
-            project_url = st.secrets.supabase.url
-            api_key = st.secrets.supabase.api_key
-            st.success("✅ Found Supabase credentials (direct format)!")
+            # No secrets, try manual input
+            st.info("No secrets configured. Using manual credentials.")
+            project_url = manual_supabase_url
+            api_key = manual_supabase_key
+            
+        # Validate we have the necessary credentials
+        if not project_url or not api_key:
+            st.error("❌ No valid Supabase credentials available!")
+            st.info("Please configure secrets or enter credentials manually.")
+            st.stop()
         
         # Test connection with a simple request
         headers = {
@@ -68,15 +115,34 @@ if st.button("Test Clover API Connection"):
     st.write("Testing Clover API connection...")
     
     try:
-        # Get Clover credentials
-        if 'store_1' in st.secrets:
+        # Try to get credentials from several sources in order of preference:
+        # 1. Streamlit secrets
+        # 2. Manual input
+        
+        # Check if secrets are configured
+        if hasattr(st, 'secrets') and 'store_1' in st.secrets:
+            # Secrets are available, try to use them
             store = st.secrets.store_1
-            name = store.name
-            merchant_id = store.merchant_id
-            access_token = store.access_token
-            st.write(f"Using credentials for store: {name}")
+            name = getattr(store, 'name', 'Store 1')
+            merchant_id = getattr(store, 'merchant_id', None)
+            access_token = getattr(store, 'access_token', None)
+            
+            if not merchant_id or not access_token:
+                st.warning("⚠️ Incomplete Clover credentials in secrets. Trying manual input...")
+                merchant_id = manual_merchant_id
+                access_token = manual_access_token
+            else:
+                st.success(f"✅ Found Clover credentials in secrets for store: {name}")
         else:
-            st.error("❌ No Clover credentials found!")
+            # No secrets, try manual input
+            st.info("No secrets configured. Using manual credentials.")
+            merchant_id = manual_merchant_id
+            access_token = manual_access_token
+            
+        # Validate we have the necessary credentials
+        if not merchant_id or not access_token:
+            st.error("❌ No valid Clover credentials available!")
+            st.info("Please configure secrets or enter credentials manually.")
             st.stop()
         
         # Test Clover connection
