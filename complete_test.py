@@ -284,6 +284,15 @@ def get_from_supabase(payment_id, table="payments"):
     
     return response.json()
 
+# Check which steps have been completed
+test_steps = {
+    "Supabase Connection": supabase_connected,
+    "Clover API Connection": clover_connected,
+    "Data Fetched from Clover": 'payments' in st.session_state and len(st.session_state.payments) > 0,
+    "Data Saved to Supabase": 'saved_payment' in st.session_state,
+    "Data Retrieved from Supabase": 'retrieved_data' in st.session_state
+}
+
 # Retrieve button - only show if we have a saved payment
 if 'saved_payment' in st.session_state:
     if st.button("Retrieve from Supabase"):
@@ -295,6 +304,9 @@ if 'saved_payment' in st.session_state:
                 
                 if retrieved_data and len(retrieved_data) > 0:
                     st.success("✅ Successfully retrieved payment from Supabase")
+                    
+                    # Store in session state for the test summary
+                    st.session_state.retrieved_data = retrieved_data
                     
                     # Display comparison
                     col1, col2 = st.columns(2)
@@ -317,15 +329,6 @@ if 'saved_payment' in st.session_state:
 
 # Summary section
 st.header("Test Summary")
-
-# Check which steps have been completed
-test_steps = {
-    "Supabase Connection": supabase_connected,
-    "Clover API Connection": clover_connected,
-    "Data Fetched from Clover": 'payments' in st.session_state and len(st.session_state.payments) > 0,
-    "Data Saved to Supabase": 'saved_payment' in st.session_state,
-    "Data Retrieved from Supabase": 'saved_payment' in st.session_state and st.button("Retrieve from Supabase")
-}
 
 # Create a DataFrame for the results
 results_df = pd.DataFrame({
