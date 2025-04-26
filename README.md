@@ -1,65 +1,63 @@
-# Clover Merchant Dashboard
+# Clover Executive Dashboard
 
-A Streamlit dashboard for visualizing sales data from multiple Clover merchant accounts and tracking expenses. This application can be deployed locally or to Streamlit Cloud with Supabase for database storage.
+A comprehensive dashboard to monitor sales data and manage expenses for Clover POS systems.
 
 ## Features
 
-- Multi-store data aggregation from Clover API
-- Sales visualization and analytics
-- Expense tracking and management
-- Profit & Loss reporting
-- Cloud deployment with PostgreSQL database
+- **Sales Monitoring**: View total sales, order count, and average order value
+- **Date Range Selection**: Filter data by predefined date ranges (Today, Yesterday, Last 7 Days, Last 30 Days, This Month, Last Month)
+- **Expense Management**: Add, edit, and delete expenses with categorization
+- **Data Visualization**: Interactive charts for sales trends
+- **Multi-store Support**: Switch between different store locations
+- **Cloud Database**: Utilizes Supabase for secure data storage
 
-## Local Setup Instructions
+## Requirements
 
-1. Clone this repository:
-   ```
-   git clone https://github.com/iqbal2go22/CloverDashboard.git
-   cd CloverDashboard
-   ```
+The application requires the following Python packages:
+- streamlit
+- pandas
+- plotly
+- requests
+- python-dotenv
+- supabase
 
-2. Install dependencies:
+See `requirements.txt` for complete dependencies and versions.
+
+## Setup
+
+1. Install dependencies:
    ```
    pip install -r requirements.txt
    ```
 
-3. Create a `.streamlit/secrets.toml` file with your Clover API credentials:
+2. Configure Supabase credentials:
+   - Create a `.streamlit/secrets.toml` file with the following content:
    ```
-   # Store 1
-   [store_1]
-   name = "Main Store"
-   merchant_id = "YOUR_MERCHANT_ID"
-   access_token = "YOUR_ACCESS_TOKEN"
-   
-   # Store 2
-   [store_2]
-   name = "Second Store"
-   merchant_id = "YOUR_MERCHANT_ID_2"
-   access_token = "YOUR_ACCESS_TOKEN_2"
+   [supabase]
+   url = "YOUR_SUPABASE_URL"
+   key = "YOUR_SUPABASE_API_KEY"
+   service_role_key = "YOUR_SUPABASE_SERVICE_ROLE_KEY"
    ```
 
-4. Run the application:
+3. Run the application:
    ```
    streamlit run app.py
    ```
 
-## Cloud Deployment
+## Deployment
 
-This application can be deployed to Streamlit Cloud with a PostgreSQL database on Supabase:
+See `deploy_to_streamlit_cloud.md` for detailed instructions on deploying to Streamlit Cloud.
 
-1. Create a Supabase account and database.
-2. Update your `.streamlit/secrets.toml` to include Supabase credentials:
-   ```
-   [supabase]
-   url = "postgresql://username:password@db.yourdatabase.supabase.co:6543/postgres"
-   
-   [clover]
-   merchant_id = "YOUR_MERCHANT_ID"
-   api_key = "YOUR_API_KEY"
-   access_token = "YOUR_ACCESS_TOKEN"
-   ```
-3. Deploy to Streamlit Cloud using the `app_supabase.py` as the entry point.
-4. See `deployment_guide.md` for detailed deployment instructions.
+## Project Structure
+
+- `app.py`: Main Streamlit application
+- `cloud_db_utils.py`: Database interaction utilities
+- `requirements.txt`: Project dependencies
+- `.streamlit/`: Streamlit configuration directory
+
+## More Information
+
+For detailed information about Supabase connection options, check the `README_SUPABASE.md` file.
 
 ## Getting Clover API Credentials
 
