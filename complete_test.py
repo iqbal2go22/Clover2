@@ -4,7 +4,7 @@ import json
 import datetime
 import pandas as pd
 import time
-import uuid  # This is part of Python's standard library
+import uuid
 import sys
 import os
 
@@ -12,260 +12,205 @@ st.set_page_config(page_title="Complete End-to-End Test", layout="wide", page_ic
 st.title("🔄 Complete End-to-End Test")
 st.write("This app tests the entire flow: Clover API → Supabase → Display")
 
-# Add version info to help with debugging
-st.sidebar.markdown("### Debug Info")
-st.sidebar.write(f"Streamlit version: {st.__version__}")
-st.sidebar.write(f"Python version: {sys.version}")
+# Simple debug info
+st.sidebar.markdown("### Version Info")
+st.sidebar.write(f"Streamlit: {st.__version__}")
 
-# Add page selection for more robust testing
-test_page = st.sidebar.radio(
-    "Select Test Page",
-    ["Full End-to-End Test", "Connection Test Only", "View Config"]
-)
+# IMPORTANT: All logic is now inside button clicks, so the app loads immediately
+st.header("Step 1: Test Connections")
 
-if test_page == "View Config":
-    st.header("Configuration Info")
-    # Check if secrets exist
-    if hasattr(st, 'secrets'):
-        sections = []
-        for section in dir(st.secrets):
-            if not section.startswith('_'):
-                sections.append(section)
-        st.write(f"✅ Secrets are configured with sections: {sections}")
-    else:
-        st.error("❌ No secrets configuration found!")
-    
-    # Show environment info
-    st.subheader("Environment Information")
-    st.json({
-        "streamlit_version": st.__version__,
-        "python_version": sys.version,
-        "running_on_cloud": "STREAMLIT_SHARING_MODE" in os.environ
-    })
-    st.stop()
-
-if test_page == "Connection Test Only":
-    st.header("Connection Test")
-    # Rest of your connection test code...
-    st.stop()
-
-# Step 1: Set up connections
-st.header("1. Setting Up Connections")
-
-# Get Supabase credentials from secrets
-try:
-    # Try connections.supabase format first (preferred)
-    if 'connections' in st.secrets and 'supabase' in st.secrets.connections:
-        supabase_project_url = st.secrets.connections.supabase.project_url
-        supabase_anon_key = st.secrets.connections.supabase.api_key
-        st.write("✅ Found Supabase credentials in connections.supabase format")
-    else:
-        # Fall back to direct format if needed
-        supabase_project_url = st.secrets.supabase.url
-        supabase_anon_key = st.secrets.supabase.api_key
-        st.write("✅ Found Supabase credentials in direct format")
-    
-    # Get service role key (for admin operations)
-    if 'connections' in st.secrets and 'supabase_admin' in st.secrets.connections:
-        supabase_service_key = st.secrets.connections.supabase_admin.api_key
-        st.write("✅ Found Supabase admin credentials")
-    elif 'connections' in st.secrets and hasattr(st.secrets.connections.supabase, 'service_role_key'):
-        supabase_service_key = st.secrets.connections.supabase.service_role_key
-        st.write("✅ Found service_role_key in connections.supabase")
-    elif hasattr(st.secrets, 'supabase') and hasattr(st.secrets.supabase, 'service_role_key'):
-        supabase_service_key = st.secrets.supabase.service_role_key
-        st.write("✅ Found service_role_key in direct format")
-    else:
-        st.error("❌ Could not find Supabase service role key in secrets")
-        supabase_service_key = "missing"
-        
-except Exception as e:
-    st.error(f"❌ Error loading Supabase credentials: {str(e)}")
-    st.write("Showing full secrets structure for debugging:")
-    # Show available sections in secrets (no actual values)
-    if hasattr(st, 'secrets'):
-        sections = []
-        for section in dir(st.secrets):
-            if not section.startswith('_'):
-                sections.append(section)
-        st.write(f"Available sections in secrets: {sections}")
-    st.stop()
-
-# Get Clover credentials from secrets
-try:
-    # Look for store_1 (Laurel)
-    if 'store_1' in st.secrets:
-        store = st.secrets.store_1
-        laurel_name = store.name
-        laurel_merchant_id = store.merchant_id
-        laurel_access_token = store.access_token
-        st.write(f"✅ Found Clover credentials for {laurel_name}")
-    else:
-        # Fallback to hardcoded values for testing
-        st.warning("⚠️ Using fallback Clover credentials (not from secrets)")
-        laurel_merchant_id = "4VZSM7038BKQ1"
-        laurel_access_token = "b9f678d7-9b27-e971-d9e4-feab8b227c96"
-except Exception as e:
-    st.error(f"❌ Error loading Clover credentials: {str(e)}")
-    st.stop()
-
-# Create status columns
-col1, col2 = st.columns(2)
-
-# Check Supabase connection
-with col1:
-    st.subheader("Supabase Connection")
-    supabase_headers = {
-        "apikey": supabase_anon_key,
-        "Authorization": f"Bearer {supabase_anon_key}",
-        "Content-Type": "application/json"
-    }
+if st.button("Test Supabase Connection"):
+    # Only try to connect when button is clicked
+    st.write("Testing Supabase connection...")
     
     try:
-        response = requests.get(f"{supabase_project_url}/rest/v1/stores?limit=1", headers=supabase_headers)
-        response.raise_for_status()
-        st.success("✅ Connected to Supabase successfully!")
-        supabase_connected = True
-    except Exception as e:
-        st.error(f"❌ Supabase connection failed: {str(e)}")
-        supabase_connected = False
-
-# Check Clover connection
-with col2:
-    st.subheader("Clover API Connection")
-    clover_headers = {
-        'Authorization': f'Bearer {laurel_access_token}',
-        'Content-Type': 'application/json'
-    }
-    
-    try:
-        response = requests.get(f"https://api.clover.com/v3/merchants/{laurel_merchant_id}", headers=clover_headers)
-        response.raise_for_status()
-        merchant_data = response.json()
-        st.success(f"✅ Connected to Clover API for: {merchant_data.get('name')}")
-        clover_connected = True
-    except Exception as e:
-        st.error(f"❌ Clover API connection failed: {str(e)}")
-        clover_connected = False
-
-if not (supabase_connected and clover_connected):
-    st.error("Cannot proceed with test due to connection issues")
-    st.stop()
-
-# Step 2: Fetch data from Clover API
-st.header("2. Fetching Data from Clover API")
-
-@st.cache_data(ttl=300)
-def fetch_clover_data(merchant_id, access_token, days=2):
-    """Fetch payment data from Clover API"""
-    # Calculate date range (last X days)
-    end_date = datetime.datetime.now()
-    start_date = end_date - datetime.timedelta(days=days)
-    
-    # Format dates for Clover API - use millisecond timestamps instead of ISO strings
-    start_ms = int(start_date.timestamp() * 1000)
-    end_ms = int(end_date.timestamp() * 1000)
-    
-    # Set up API request
-    base_url = "https://api.clover.com/v3"
-    headers = {
-        'Authorization': f'Bearer {access_token}',
-        'Content-Type': 'application/json'
-    }
-    
-    # Fetch payments with order information
-    payments_url = f"{base_url}/merchants/{merchant_id}/payments"
-    
-    # Just use the fallback method since it works reliably
-    params = {
-        'limit': 10,
-        'expand': 'order'
-    }
-    
-    st.write(f"Fetching recent payments without date filter")
-    
-    try:
-        # Get payments
-        response = requests.get(payments_url, headers=headers, params=params)
-        
-        # Show response status for debugging
-        st.write(f"Response status: {response.status_code}")
-        
-        response.raise_for_status()
-        data = response.json()
-        
-        # If we need to filter by date, we can do it client-side
-        elements = data.get('elements', [])
-        st.write(f"Successfully fetched {len(elements)} payments")
-        
-        return elements
-    except Exception as e:
-        st.error(f"Error fetching from Clover API: {str(e)}")
-        return []
-
-# Fetch data button
-if st.button("Fetch Data from Clover"):
-    with st.spinner("Fetching data from Clover API..."):
-        payments = fetch_clover_data(laurel_merchant_id, laurel_access_token)
-        
-        if payments:
-            st.success(f"✅ Successfully fetched {len(payments)} payments from Clover API")
-            
-            # Show sample payment
-            st.subheader("Sample Payment Data")
-            st.json(payments[0])
-            
-            # Store in session state for next steps
-            st.session_state.payments = payments
+        # Get credentials from secrets
+        if 'connections' in st.secrets and 'supabase' in st.secrets.connections:
+            project_url = st.secrets.connections.supabase.project_url
+            api_key = st.secrets.connections.supabase.api_key
+            st.success("✅ Found Supabase credentials!")
         else:
-            st.warning("No payment data found in the selected date range.")
-            st.session_state.payments = []
-
-# Step 3: Process and save to Supabase
-st.header("3. Saving Data to Supabase")
-
-@st.cache_data(ttl=300)
-def get_store_id(merchant_id):
-    """Get the numeric store_id for a merchant_id from the stores table"""
-    try:
-        supabase_headers = {
-            "apikey": supabase_anon_key,
-            "Authorization": f"Bearer {supabase_anon_key}",
+            project_url = st.secrets.supabase.url
+            api_key = st.secrets.supabase.api_key
+            st.success("✅ Found Supabase credentials (direct format)!")
+        
+        # Test connection with a simple request
+        headers = {
+            "apikey": api_key,
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
         
-        # Query the stores table to get the numeric ID
-        url = f"{supabase_project_url}/rest/v1/stores?merchant_id=eq.{merchant_id}"
-        response = requests.get(url, headers=supabase_headers)
-        response.raise_for_status()
+        response = requests.get(f"{project_url}/rest/v1/stores?limit=1", 
+                               headers=headers, 
+                               timeout=10)
         
-        stores = response.json()
-        if stores and len(stores) > 0:
-            # Return the numeric ID
-            return stores[0].get('id')
+        if response.status_code == 200:
+            st.success("✅ Supabase connection successful!")
+            # Store connection in session state for later steps
+            st.session_state.supabase = {
+                "project_url": project_url,
+                "api_key": api_key,
+                "headers": headers
+            }
+            stores = response.json()
+            if stores:
+                st.write("Found stores:")
+                st.write(stores)
         else:
-            st.error(f"Store with merchant_id {merchant_id} not found in the database")
-            return None
+            st.error(f"❌ Supabase connection failed: {response.status_code}")
+            st.write(f"Response: {response.text}")
             
     except Exception as e:
-        st.error(f"Error getting store ID: {str(e)}")
-        return None
+        st.error(f"❌ Supabase connection error: {str(e)}")
 
-def process_payments(merchant_id, payments):
-    """Process payment data for storage"""
-    # First get the numeric store_id
-    store_id = get_store_id(merchant_id)
+if st.button("Test Clover API Connection"):
+    st.write("Testing Clover API connection...")
     
-    if not store_id:
-        st.error("Cannot process payments without a valid store_id")
-        return []
+    try:
+        # Get Clover credentials
+        if 'store_1' in st.secrets:
+            store = st.secrets.store_1
+            name = store.name
+            merchant_id = store.merchant_id
+            access_token = store.access_token
+            st.write(f"Using credentials for store: {name}")
+        else:
+            st.error("❌ No Clover credentials found!")
+            st.stop()
         
-    st.success(f"Found store_id: {store_id} for merchant_id: {merchant_id}")
+        # Test Clover connection
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        response = requests.get(
+            f"https://api.clover.com/v3/merchants/{merchant_id}", 
+            headers=headers,
+            timeout=10
+        )
+        
+        if response.status_code == 200:
+            st.success("✅ Clover API connection successful!")
+            merchant_data = response.json()
+            st.write(f"Connected to merchant: {merchant_data.get('name')}")
+            
+            # Store connection in session state for later steps
+            st.session_state.clover = {
+                "merchant_id": merchant_id,
+                "access_token": access_token,
+                "headers": headers
+            }
+        else:
+            st.error(f"❌ Clover API connection failed: {response.status_code}")
+            st.write(f"Response: {response.text}")
+            
+    except Exception as e:
+        st.error(f"❌ Clover API connection error: {str(e)}")
+
+# Step 2: Fetch data
+st.header("Step 2: Fetch Data from Clover")
+
+if st.button("Fetch Payments"):
+    if 'clover' not in st.session_state:
+        st.error("⚠️ Please test Clover connection first!")
+        st.stop()
     
-    payments_processed = []
+    st.write("Fetching recent payments from Clover...")
     
-    for payment in payments:
-        # Extract payment data
+    try:
+        merchant_id = st.session_state.clover["merchant_id"]
+        headers = st.session_state.clover["headers"]
+        
+        # Fetch some recent payments (no date filter)
+        url = f"https://api.clover.com/v3/merchants/{merchant_id}/payments"
+        params = {
+            'limit': 5,
+            'expand': 'order'
+        }
+        
+        response = requests.get(url, headers=headers, params=params, timeout=15)
+        
+        if response.status_code == 200:
+            data = response.json()
+            payments = data.get('elements', [])
+            
+            if payments:
+                st.success(f"✅ Successfully fetched {len(payments)} payments!")
+                st.session_state.payments = payments
+                
+                # Show sample payment
+                st.subheader("Sample Payment")
+                st.json(payments[0])
+            else:
+                st.warning("No payments found!")
+        else:
+            st.error(f"❌ Failed to fetch payments: {response.status_code}")
+            st.write(f"Response: {response.text}")
+    
+    except Exception as e:
+        st.error(f"❌ Error fetching payments: {str(e)}")
+
+# Step 3: Save to Supabase
+st.header("Step 3: Save to Supabase")
+
+if st.button("Process and Save Payment"):
+    # Verify prerequisites
+    if 'payments' not in st.session_state:
+        st.error("⚠️ Please fetch payments first!")
+        st.stop()
+        
+    if 'supabase' not in st.session_state:
+        st.error("⚠️ Please test Supabase connection first!")
+        st.stop()
+    
+    st.write("Processing payment data...")
+    
+    try:
+        # Get a payment to process
+        payment = st.session_state.payments[0]
+        
+        # Get Supabase connection details
+        supabase = st.session_state.supabase
+        project_url = supabase["project_url"]
+        
+        # Get service role key if available
+        if 'connections' in st.secrets and 'supabase_admin' in st.secrets.connections:
+            service_key = st.secrets.connections.supabase_admin.api_key
+        elif 'supabase' in st.secrets and hasattr(st.secrets.supabase, 'service_role_key'):
+            service_key = st.secrets.supabase.service_role_key
+        else:
+            service_key = supabase["api_key"]  # Fallback to anon key
+        
+        # Admin headers for write operations
+        admin_headers = {
+            "apikey": service_key,
+            "Authorization": f"Bearer {service_key}",
+            "Content-Type": "application/json",
+            "Prefer": "return=representation"
+        }
+        
+        # First, get the store ID from merchant_id
+        merchant_id = st.session_state.clover["merchant_id"]
+        store_url = f"{project_url}/rest/v1/stores?merchant_id=eq.{merchant_id}"
+        
+        # Get the store
+        store_response = requests.get(store_url, headers=supabase["headers"], timeout=10)
+        
+        if store_response.status_code != 200:
+            st.error(f"❌ Could not find store with merchant_id {merchant_id}")
+            st.stop()
+            
+        stores = store_response.json()
+        if not stores:
+            st.error(f"❌ No store found with merchant_id {merchant_id}")
+            st.stop()
+            
+        store_id = stores[0].get('id')
+        st.write(f"Found store with ID: {store_id}")
+        
+        # Process payment data
         payment_id = payment.get('id')
         order_id = payment.get('order', {}).get('id')
         amount = payment.get('amount')
@@ -276,190 +221,128 @@ def process_payments(merchant_id, payments):
         card_type = payment.get('cardTransaction', {}).get('cardType', '')
         last_4 = payment.get('cardTransaction', {}).get('last4', '')
         
-        if payment_id and amount is not None and created_time:
-            # Convert timestamp to datetime
-            created_at = datetime.datetime.fromtimestamp(created_time / 1000)
-            
-            # Format for Supabase - use the correct schema
-            payment_data = {
-                'payment_id': payment_id,
-                'store_id': store_id,  # Use numeric store_id
-                'amount': amount,
-                'created_time': created_at.isoformat(),
-                'employee_id': employee_id,
-                'order_id': order_id,
-                'device_id': device_id,
-                'tender_type': tender_type,
-                'card_type': card_type,
-                'last_4': last_4,
-                'sync_date': datetime.datetime.now().isoformat()
-            }
-            payments_processed.append(payment_data)
-    
-    return payments_processed
-
-def save_to_supabase(data, table="payments"):
-    """Save test data to Supabase"""
-    supabase_headers = {
-        "apikey": supabase_service_key,  # Use service key for write operations
-        "Authorization": f"Bearer {supabase_service_key}",
-        "Content-Type": "application/json",
-        "Prefer": "return=representation"
-    }
-    
-    # First check if the payment already exists
-    payment_id = data[0]['payment_id']
-    check_url = f"{supabase_project_url}/rest/v1/{table}?payment_id=eq.{payment_id}"
-    check_response = requests.get(check_url, headers=supabase_headers)
-    
-    if check_response.status_code == 200 and len(check_response.json()) > 0:
-        # Payment already exists, this is OK
-        st.warning(f"Payment {payment_id} already exists in the database. Using existing record.")
-        return check_response.json()
-    
-    # Payment doesn't exist, insert it
-    url = f"{supabase_project_url}/rest/v1/{table}"
-    
-    # Insert data
-    st.write(f"Saving to table: {table}")
-    try:
-        response = requests.post(url, headers=supabase_headers, json=data)
+        # Convert timestamp to datetime
+        created_at = datetime.datetime.fromtimestamp(created_time / 1000)
         
-        # Handle possible errors
-        if response.status_code != 200 and response.status_code != 201:
-            st.error(f"Error response: {response.text}")
+        # Format payment for Supabase
+        payment_data = {
+            'payment_id': payment_id,
+            'store_id': store_id,
+            'amount': amount,
+            'created_time': created_at.isoformat(),
+            'employee_id': employee_id,
+            'order_id': order_id,
+            'device_id': device_id,
+            'tender_type': tender_type,
+            'card_type': card_type,
+            'last_4': last_4,
+            'sync_date': datetime.datetime.now().isoformat()
+        }
+        
+        # Check if payment already exists
+        check_url = f"{project_url}/rest/v1/payments?payment_id=eq.{payment_id}"
+        check_response = requests.get(check_url, headers=supabase["headers"], timeout=10)
+        
+        if check_response.status_code == 200 and check_response.json():
+            st.warning(f"Payment {payment_id} already exists. Using existing record.")
+            st.session_state.saved_payment = check_response.json()[0]
+            st.success("✅ Payment record ready for testing!")
+        else:
+            # Insert payment
+            insert_url = f"{project_url}/rest/v1/payments"
+            insert_response = requests.post(insert_url, headers=admin_headers, json=[payment_data], timeout=15)
             
-            # Special handling for duplicate key errors (this is actually OK)
-            if response.status_code == 409 and "duplicate key" in response.text:
-                st.warning("Payment record already exists (duplicate key). Using existing record.")
-                # Get the existing record
-                existing_response = requests.get(check_url, headers=supabase_headers)
-                if existing_response.status_code == 200:
-                    return existing_response.json()
-            
-        # For other errors, raise an exception
-        response.raise_for_status()
-        return response.json()
-    except Exception as e:
-        # Last attempt - check if the error was just a duplicate key issue
-        if "duplicate key" in str(e):
-            st.warning("Payment record already exists. Using existing record.")
-            existing_response = requests.get(check_url, headers=supabase_headers)
-            if existing_response.status_code == 200:
-                return existing_response.json()
-        raise e
-
-# Process and save button - only show if we have payments
-if 'payments' in st.session_state and st.session_state.payments:
-    if st.button("Process and Save to Supabase"):
-        with st.spinner("Processing and saving payments..."):
-            # Process payments
-            processed_payments = process_payments(laurel_merchant_id, st.session_state.payments)
-            
-            if processed_payments:
-                st.write(f"Processed {len(processed_payments)} payments")
-                
-                # Show one processed payment
-                st.subheader("Sample Processed Payment")
-                st.write(processed_payments[0])
-                
-                # Try to save to Supabase
-                try:
-                    # Save one payment for testing
-                    result = save_to_supabase([processed_payments[0]])
-                    
-                    if result:
-                        st.success("✅ Successfully saved payment to Supabase")
-                        st.session_state.saved_payment = processed_payments[0]
-                    else:
-                        st.error("Failed to save payment to Supabase")
-                except Exception as e:
-                    st.error(f"Error saving to Supabase: {str(e)}")
+            if insert_response.status_code == 201 or insert_response.status_code == 200:
+                st.success("✅ Payment saved to Supabase!")
+                st.session_state.saved_payment = payment_data
             else:
-                st.warning("No payments to process")
-
-# Step 4: Retrieve from Supabase and verify
-st.header("4. Retrieving Data from Supabase")
-
-def get_from_supabase(payment_id, table="payments"):
-    """Retrieve test payment from Supabase"""
-    supabase_headers = {
-        "apikey": supabase_anon_key,
-        "Authorization": f"Bearer {supabase_anon_key}",
-        "Content-Type": "application/json"
-    }
+                st.error(f"❌ Failed to save payment: {insert_response.status_code}")
+                st.write(f"Response: {insert_response.text}")
+                
+                # Check if it's a duplicate key issue
+                if insert_response.status_code == 409 and "duplicate key" in insert_response.text:
+                    st.warning("This appears to be a duplicate key error - the payment might already exist.")
+                    # Try to get the existing record
+                    existing = requests.get(check_url, headers=supabase["headers"], timeout=10)
+                    if existing.status_code == 200 and existing.json():
+                        st.session_state.saved_payment = existing.json()[0]
+                        st.success("✅ Using existing payment record!")
     
-    # Use payment_id, not id
-    url = f"{supabase_project_url}/rest/v1/{table}?payment_id=eq.{payment_id}"
-    response = requests.get(url, headers=supabase_headers)
-    response.raise_for_status()
-    
-    return response.json()
+    except Exception as e:
+        st.error(f"❌ Error processing payment: {str(e)}")
 
-# Check which steps have been completed
-test_steps = {
-    "Supabase Connection": supabase_connected,
-    "Clover API Connection": clover_connected,
-    "Data Fetched from Clover": 'payments' in st.session_state and len(st.session_state.payments) > 0,
-    "Data Saved to Supabase": 'saved_payment' in st.session_state,
-    "Data Retrieved from Supabase": 'retrieved_data' in st.session_state
+# Step 4: Verify data in Supabase
+st.header("Step 4: Verify Data in Supabase")
+
+if st.button("Retrieve Payment"):
+    if 'saved_payment' not in st.session_state:
+        st.error("⚠️ Please save a payment first!")
+        st.stop()
+        
+    if 'supabase' not in st.session_state:
+        st.error("⚠️ Please test Supabase connection first!")
+        st.stop()
+    
+    st.write("Retrieving payment from Supabase...")
+    
+    try:
+        # Get the payment ID
+        payment_id = st.session_state.saved_payment['payment_id']
+        
+        # Set up the query
+        supabase = st.session_state.supabase
+        url = f"{supabase['project_url']}/rest/v1/payments?payment_id=eq.{payment_id}"
+        
+        # Fetch the payment
+        response = requests.get(url, headers=supabase["headers"], timeout=10)
+        
+        if response.status_code == 200:
+            payments = response.json()
+            if payments:
+                st.success("✅ Payment successfully retrieved from Supabase!")
+                
+                # Compare the records
+                st.subheader("Data Verification")
+                
+                # Create two columns
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.write("Original Data:")
+                    st.json(st.session_state.saved_payment)
+                    
+                with col2:
+                    st.write("Retrieved Data:")
+                    st.json(payments[0])
+                
+                # Confirmation of success
+                st.success("🎉 END-TO-END TEST SUCCESSFUL!")
+                st.balloons()
+                
+            else:
+                st.error(f"❌ No payment found with ID: {payment_id}")
+        else:
+            st.error(f"❌ Failed to retrieve payment: {response.status_code}")
+            st.write(f"Response: {response.text}")
+    
+    except Exception as e:
+        st.error(f"❌ Error retrieving payment: {str(e)}")
+
+# Add a summary of what's been completed
+st.header("Test Progress")
+
+# Track which steps have been completed
+steps = {
+    "Supabase Connection": "supabase" in st.session_state,
+    "Clover API Connection": "clover" in st.session_state,
+    "Data Fetched": "payments" in st.session_state,
+    "Data Saved": "saved_payment" in st.session_state
 }
 
-# Retrieve button - only show if we have a saved payment
-if 'saved_payment' in st.session_state:
-    if st.button("Retrieve from Supabase"):
-        with st.spinner("Retrieving payment from Supabase..."):
-            payment_id = st.session_state.saved_payment['payment_id']
-            
-            try:
-                retrieved_data = get_from_supabase(payment_id)
-                
-                if retrieved_data and len(retrieved_data) > 0:
-                    st.success("✅ Successfully retrieved payment from Supabase")
-                    
-                    # Store in session state for the test summary
-                    st.session_state.retrieved_data = retrieved_data
-                    
-                    # Display comparison
-                    col1, col2 = st.columns(2)
-                    
-                    with col1:
-                        st.subheader("Original Data Sent")
-                        st.write(st.session_state.saved_payment)
-                    
-                    with col2:
-                        st.subheader("Data Retrieved from Supabase")
-                        st.write(retrieved_data[0])
-                    
-                    # Final success message
-                    st.success("🎉 FULL END-TO-END TEST SUCCESSFUL!")
-                    st.balloons()
-                else:
-                    st.error("No data found in Supabase")
-            except Exception as e:
-                st.error(f"Error retrieving from Supabase: {str(e)}")
-
-# Summary section
-st.header("Test Summary")
-
-# Create a DataFrame for the results
-results_df = pd.DataFrame({
-    "Test Step": test_steps.keys(),
-    "Status": ["✅ COMPLETE" if status else "❌ INCOMPLETE" for status in test_steps.values()]
+# Create a simple status table
+status_df = pd.DataFrame({
+    "Step": steps.keys(),
+    "Status": ["✅ Complete" if status else "❌ Incomplete" for status in steps.values()]
 })
 
-st.table(results_df)
-
-# Next steps guidance
-st.subheader("Next Steps")
-st.write("""
-1. If all tests passed, your application is correctly configured and should work properly.
-2. If any test failed, check the error messages for troubleshooting.
-3. Deploy your main application to Streamlit Cloud.
-""")
-
-# Footer with more information
-st.markdown("---")
-st.write("This test confirms that the complete data flow works: Clover API → Supabase → Application display")
-if not 'payments' in st.session_state:
-    st.info("👆 Start by clicking 'Fetch Data from Clover' to begin the test") 
+st.table(status_df) 
