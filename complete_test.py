@@ -137,8 +137,44 @@ if st.button("Fetch Data from Clover"):
 # Step 3: Process and save to Supabase
 st.header("3. Saving Data to Supabase")
 
+@st.cache_data(ttl=300)
+def get_store_id(merchant_id):
+    """Get the numeric store_id for a merchant_id from the stores table"""
+    try:
+        supabase_headers = {
+            "apikey": supabase_anon_key,
+            "Authorization": f"Bearer {supabase_anon_key}",
+            "Content-Type": "application/json"
+        }
+        
+        # Query the stores table to get the numeric ID
+        url = f"{supabase_project_url}/rest/v1/stores?merchant_id=eq.{merchant_id}"
+        response = requests.get(url, headers=supabase_headers)
+        response.raise_for_status()
+        
+        stores = response.json()
+        if stores and len(stores) > 0:
+            # Return the numeric ID
+            return stores[0].get('id')
+        else:
+            st.error(f"Store with merchant_id {merchant_id} not found in the database")
+            return None
+            
+    except Exception as e:
+        st.error(f"Error getting store ID: {str(e)}")
+        return None
+
 def process_payments(merchant_id, payments):
     """Process payment data for storage"""
+    # First get the numeric store_id
+    store_id = get_store_id(merchant_id)
+    
+    if not store_id:
+        st.error("Cannot process payments without a valid store_id")
+        return []
+        
+    st.success(f"Found store_id: {store_id} for merchant_id: {merchant_id}")
+    
     payments_processed = []
     
     for payment in payments:
@@ -160,7 +196,7 @@ def process_payments(merchant_id, payments):
             # Format for Supabase - use the correct schema
             payment_data = {
                 'payment_id': payment_id,
-                'store_id': merchant_id,
+                'store_id': store_id,  # Use numeric store_id
                 'amount': amount,
                 'created_time': created_at.isoformat(),
                 'employee_id': employee_id,
