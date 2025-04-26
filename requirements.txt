@@ -9,4 +9,5 @@ altair==5.2.0
 sqlalchemy==2.0.27
 psycopg2-binary==2.9.9
 tqdm==4.66.1
+uuid==1.30
 # We're not using the supabase package anymore - using direct REST API calls instead
