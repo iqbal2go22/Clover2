@@ -169,7 +169,7 @@ def process_payments(merchant_id, payments):
     
     return payments_processed
 
-def save_to_supabase(data, table="payments_test"):
+def save_to_supabase(data, table="payments"):
     """Save test data to Supabase"""
     supabase_headers = {
         "apikey": supabase_service_key,  # Use service key for write operations
@@ -178,62 +178,22 @@ def save_to_supabase(data, table="payments_test"):
         "Prefer": "return=representation"
     }
     
-    # Use a different table for testing to avoid conflicts
+    # Use the existing payments table
     url = f"{supabase_project_url}/rest/v1/{table}"
     
-    # Ensure test table exists
-    create_test_table()
+    # No need to create test table since we're using the existing payments table
     
     # Insert data
+    st.write(f"Saving to table: {table}")
     response = requests.post(url, headers=supabase_headers, json=data)
+    
+    # Log any error details
+    if response.status_code != 200:
+        st.error(f"Error response: {response.text}")
+        
     response.raise_for_status()
     
     return response.json()
-
-def create_test_table():
-    """Create test table if it doesn't exist"""
-    # Use service key for table operations
-    supabase_headers = {
-        "apikey": supabase_service_key,
-        "Authorization": f"Bearer {supabase_service_key}",
-        "Content-Type": "application/json"
-    }
-    
-    # Check if table exists first
-    check_url = f"{supabase_project_url}/rest/v1/payments_test?limit=1"
-    try:
-        response = requests.get(check_url, headers=supabase_headers)
-        # If 200, table exists
-        if response.status_code == 200:
-            return True
-    except:
-        pass  # Continue to create the table
-    
-    # Create table using an RPC function
-    sql = """
-    CREATE TABLE IF NOT EXISTS payments_test (
-        id TEXT PRIMARY KEY,
-        payment_id TEXT,
-        merchant_id TEXT,
-        order_id TEXT,
-        amount INTEGER,
-        created_time TIMESTAMP WITH TIME ZONE,
-        sync_date TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-    );
-    """
-    
-    try:
-        # Try using a special SQL execution endpoint if available
-        rpc_url = f"{supabase_project_url}/rest/v1/rpc/execute_sql"
-        payload = {"query": sql}
-        response = requests.post(rpc_url, headers=supabase_headers, json=payload)
-        
-        # If this fails, it likely means the RPC function doesn't exist
-        # But that's OK since we already checked if the table exists
-    except:
-        pass
-    
-    return True
 
 # Process and save button - only show if we have payments
 if 'payments' in st.session_state and st.session_state.payments:
@@ -267,7 +227,7 @@ if 'payments' in st.session_state and st.session_state.payments:
 # Step 4: Retrieve from Supabase and verify
 st.header("4. Retrieving Data from Supabase")
 
-def get_from_supabase(payment_id, table="payments_test"):
+def get_from_supabase(payment_id, table="payments"):
     """Retrieve test payment from Supabase"""
     supabase_headers = {
         "apikey": supabase_anon_key,
