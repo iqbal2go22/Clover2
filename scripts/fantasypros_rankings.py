@@ -80,7 +80,7 @@ def extract_ecr_data(html: str) -> Dict:
         return json.loads(cleaned)
 
 
-def write_players_csv(ecr_data: Dict, out_dir: str) -> tuple[str, int]:
+def write_players_csv(ecr_data: Dict, out_dir: str, requested_scoring: Optional[str] = None) -> tuple[str, int]:
     players: List[Dict] = ecr_data.get("players", [])
     if not players:
         raise ValueError("ecrData contains no players")
@@ -88,7 +88,11 @@ def write_players_csv(ecr_data: Dict, out_dir: str) -> tuple[str, int]:
     # Build file name from metadata for clarity
     position = str(ecr_data.get("position_id", "pos")).lower()
     ranking_type = str(ecr_data.get("ranking_type_name", "weekly")).lower()
-    scoring = str(ecr_data.get("scoring", "std")).lower()
+    # Prefer the requested scoring in output filenames so settings are reflected
+    if requested_scoring:
+        scoring = str(requested_scoring).lower()
+    else:
+        scoring = str(ecr_data.get("scoring", "std")).lower()
     week = str(ecr_data.get("week", "na"))
     year = str(ecr_data.get("year", "unknown"))
 
@@ -128,13 +132,21 @@ def write_players_csv(ecr_data: Dict, out_dir: str) -> tuple[str, int]:
     return out_path, len(players)
 
 
-def process_position(position: str, out_dir: str) -> FetchResult:
+def process_position(position: str, out_dir: str, scoring: str) -> FetchResult:
     pos_slug = position.strip().lower()
+    scoring_param = scoring.strip().upper()
     url = BASE_URL.format(pos=pos_slug)
+    # Append scoring parameter. Valid values observed: STD, HALF, PPR
+    if scoring_param:
+        connector = '&' if '?' in url else '?'
+        url = f"{url}{connector}scoring={scoring_param}"
+    # Ensure the Overview view is requested (matches user's requested setting)
+    connector = '&' if '?' in url else '?'
+    url = f"{url}{connector}view=overview"
     try:
         html = fetch_html(url)
         ecr_data = extract_ecr_data(html)
-        csv_path, num_rows = write_players_csv(ecr_data, out_dir)
+        csv_path, num_rows = write_players_csv(ecr_data, out_dir, requested_scoring=scoring_param)
         return FetchResult(position=position.upper(), csv_path=csv_path, num_rows=num_rows)
     except Exception as exc:  # noqa: BLE001
         return FetchResult(position=position.upper(), csv_path=None, num_rows=0, error=str(exc))
@@ -153,13 +165,20 @@ def main(argv: Optional[List[str]] = None) -> int:
         default="/workspace/data/fantasypros",
         help="Output directory for CSV files",
     )
+    parser.add_argument(
+        "--scoring",
+        default="HALF",
+        choices=["STD", "HALF", "PPR", "std", "half", "ppr"],
+        help="Scoring format to request from FantasyPros (default: HALF)",
+    )
     args = parser.parse_args(argv)
 
     out_dir = args.out
+    scoring: str = args.scoring
     results: List[FetchResult] = []
 
     for idx, position in enumerate(args.positions, start=1):
-        result = process_position(position, out_dir)
+        result = process_position(position, out_dir, scoring)
         results.append(result)
         # Be polite to remote server
         if idx < len(args.positions):
