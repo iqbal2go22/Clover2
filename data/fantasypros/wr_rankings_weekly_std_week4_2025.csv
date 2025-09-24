@@ -1,0 +1,136 @@
+rank_ecr,player_name,player_short_name,player_team_id,player_positions,player_opponent,pos_rank,r2p_pts,rank_min,rank_max,rank_ave,rank_std,player_bye_week,player_owned_avg,player_page_url,player_id
+1,Puka Nacua,P. Nacua,LAR,WR,vs. IND,WR1,14.0,1,1,1.00,0.00,8,99.8,https://www.fantasypros.com/nfl/players/puka-nacua.php,23180
+2,Jaxon Smith-Njigba,J. Smith-Njigba,SEA,WR,at ARI,WR2,12.2,2,8,3.36,1.67,8,99.3,https://www.fantasypros.com/nfl/players/jaxon-smith-njigba.php,23070
+3,Justin Jefferson,J. Jefferson,MIN,WR,at PIT,WR3,11.9,2,4,3.82,0.57,6,99.8,https://www.fantasypros.com/nfl/players/justin-jefferson.php,19236
+4,Amon-Ra St. Brown,A. St. Brown,DET,WR,vs. CLE,WR4,11.6,2,8,4.55,2.15,8,99.8,https://www.fantasypros.com/nfl/players/amonra-stbrown.php,19799
+5,Nico Collins,N. Collins,HOU,WR,vs. TEN,WR5,11.2,4,6,4.91,0.67,6,99.7,https://www.fantasypros.com/nfl/players/nico-collins.php,20130
+6,Malik Nabers,M. Nabers,NYG,WR,vs. LAC,WR6,10.6,2,7,5.64,1.77,14,99.6,https://www.fantasypros.com/nfl/players/malik-nabers.php,25409
+7,Ja'Marr Chase,J. Chase,CIN,WR,at DEN,WR7,10.5,3,8,6.09,1.31,10,99.7,https://www.fantasypros.com/nfl/players/jamarr-chase.php,19788
+8,Davante Adams,D. Adams,LAR,WR,vs. IND,WR8,10.1,7,12,9.73,1.21,8,98.2,https://www.fantasypros.com/nfl/players/davante-adams.php,12123
+9,Drake London,D. London,ATL,WR,vs. WAS,WR9,10.0,5,13,10.09,2.39,5,99.6,https://www.fantasypros.com/nfl/players/drake-london.php,23163
+10,Garrett Wilson,G. Wilson,NYJ,WR,at MIA,WR10,9.8,8,12,10.18,1.85,9,98.6,https://www.fantasypros.com/nfl/players/garrett-wilson.php,23072
+11,A.J. Brown,A.J. Brown,PHI,WR,at TB,WR11,9.8,8,13,10.73,1.54,9,99.8,https://www.fantasypros.com/nfl/players/aj-brown.php,18218
+12,Rome Odunze,R. Odunze,CHI,WR,at LV,WR12,9.7,8,14,10.82,1.75,5,93.4,https://www.fantasypros.com/nfl/players/rome-odunze.php,25411
+13,Zay Flowers,Z. Flowers,BAL,WR,at KC,WR13,9.5,7,15,12.27,2.30,7,97.3,https://www.fantasypros.com/nfl/players/zay-flowers.php,22916
+14,George Pickens,G. Pickens,DAL,WR,vs. GB,WR14,9.4,13,20,15.09,1.83,10,95.6,https://www.fantasypros.com/nfl/players/george-pickens.php,22963
+15,Emeka Egbuka,E. Egbuka,TB,WR,vs. PHI,WR15,9.2,14,21,16.18,2.44,9,93.1,https://www.fantasypros.com/nfl/players/emeka-egbuka.php,23062
+16,Tetairoa McMillan,T. McMillan,CAR,WR,at NE,WR16,9.1,14,20,16.36,1.61,14,95.6,https://www.fantasypros.com/nfl/players/tetairoa-mcmillan.php,25417
+17,Ladd McConkey,L. McConkey,LAC,WR,at NYG,WR17,9.0,16,21,17.91,1.62,12,99.3,https://www.fantasypros.com/nfl/players/ladd-mcconkey.php,26122
+18,Ricky Pearsall,R. Pearsall,SF,WR,vs. JAC,WR18,8.9,15,24,19.36,2.60,14,89.4,https://www.fantasypros.com/nfl/players/ricky-pearsall.php,26214
+19,Courtland Sutton,C. Sutton,DEN,WR,vs. CIN,WR19,8.9,15,23,19.36,2.57,12,95.3,https://www.fantasypros.com/nfl/players/courtland-sutton.php,17253
+20,Brian Thomas Jr.,B. Thomas Jr.,JAC,WR,at SF,WR20,8.8,13,25,19.64,3.08,8,99.4,https://www.fantasypros.com/nfl/players/brian-thomas-jr.php,23000
+21,Tyreek Hill,T. Hill,MIA,WR,vs. NYJ,WR21,8.8,15,24,20.00,3.46,12,99.1,https://www.fantasypros.com/nfl/players/tyreek-hill.php,15802
+22,Deebo Samuel Sr.,D. Samuel Sr.,WAS,WR,at ATL,WR22,8.7,19,23,20.73,1.48,12,90.8,https://www.fantasypros.com/nfl/players/deebo-samuel.php,18244
+23,Jameson Williams,J. Williams,DET,WR,vs. CLE,WR23,8.4,20,25,22.45,1.62,8,94.5,https://www.fantasypros.com/nfl/players/jameson-williams.php,23677
+24,Keenan Allen,K. Allen,LAC,WR,at NYG,WR24,8.3,21,31,23.82,2.92,12,78.9,https://www.fantasypros.com/nfl/players/keenan-allen.php,11616
+25,Marvin Harrison Jr.,M. Harrison Jr.,ARI,WR,vs. SEA,WR25,8.3,22,28,24.73,2.05,8,98.1,https://www.fantasypros.com/nfl/players/marvin-harrison-jr.php,23064
+26,DK Metcalf,DK Metcalf,PIT,WR,vs. MIN,WR26,8.3,20,27,25.27,1.81,5,98,https://www.fantasypros.com/nfl/players/dk-metcalf.php,18219
+27,Jakobi Meyers,J. Meyers,LV,WR,vs. CHI,WR27,8.1,25,29,26.91,1.08,8,91,https://www.fantasypros.com/nfl/players/jakobi-meyers.php,18598
+28,Quentin Johnston,Q. Johnston,LAC,WR,at NYG,WR28,7.8,26,32,28.91,1.78,12,29.4,https://www.fantasypros.com/nfl/players/quentin-johnston.php,23123
+29,DeVonta Smith,D. Smith,PHI,WR,at TB,WR29,7.7,27,38,29.91,2.81,9,95.2,https://www.fantasypros.com/nfl/players/devonta-smith.php,19222
+30,DJ Moore,DJ Moore,CHI,WR,at LV,WR30,7.6,29,35,31.00,1.95,5,95.2,https://www.fantasypros.com/nfl/players/dj-moore-wr.php,17265
+31,Tee Higgins,T. Higgins,CIN,WR,at DEN,WR31,7.6,24,35,31.45,2.87,10,99.2,https://www.fantasypros.com/nfl/players/tee-higgins.php,19211
+32,Michael Pittman Jr.,M. Pittman Jr.,IND,WR,at LAR,WR32,7.6,31,37,32.09,1.83,11,80.9,https://www.fantasypros.com/nfl/players/michael-pittman.php,19278
+33,Chris Olave,C. Olave,NO,WR,at BUF,WR33,7.4,30,35,32.73,1.54,11,90.3,https://www.fantasypros.com/nfl/players/chris-olave.php,20111
+34,Calvin Ridley,C. Ridley,TEN,WR,at HOU,WR34,7.3,33,40,35.09,2.31,10,91.4,https://www.fantasypros.com/nfl/players/calvin-ridley.php,17258
+35,Jaylen Waddle,J. Waddle,MIA,WR,vs. NYJ,WR35,7.3,34,37,35.27,0.96,12,93.4,https://www.fantasypros.com/nfl/players/jaylen-waddle.php,19790
+36,Jordan Addison,J. Addison,MIN,WR,at PIT,WR36,7.3,32,51,37.91,5.28,6,83,https://www.fantasypros.com/nfl/players/jordan-addison.php,23107
+37,Keon Coleman,K. Coleman,BUF,WR,vs. NO,WR37,7.2,34,44,38.91,3.23,7,79.8,https://www.fantasypros.com/nfl/players/keon-coleman.php,26019
+38,Khalil Shakir,K. Shakir,BUF,WR,vs. NO,WR38,7.2,38,43,39.55,1.67,7,79.8,https://www.fantasypros.com/nfl/players/khalil-shakir.php,23748
+39,Jerry Jeudy,J. Jeudy,CLE,WR,at DET,WR39,7.1,39,47,41.36,2.71,9,91.5,https://www.fantasypros.com/nfl/players/jerry-jeudy.php,19201
+40,Cedric Tillman,C. Tillman,CLE,WR,at DET,WR40,7.1,37,60,42.18,6.26,9,40.8,https://www.fantasypros.com/nfl/players/cedric-tillman.php,25287
+41,Romeo Doubs,R. Doubs,GB,WR,at DAL,WR41,6.8,40,49,42.45,2.57,5,23.6,https://www.fantasypros.com/nfl/players/romeo-doubs.php,23794
+42,Matthew Golden,M. Golden,GB,WR,at DAL,WR42,6.8,36,49,42.64,3.89,5,82.5,https://www.fantasypros.com/nfl/players/matthew-golden.php,26024
+43,Terry McLaurin,T. McLaurin,WAS,WR,at ATL,WR43,6.7,27,108,44.45,21.89,12,98.4,https://www.fantasypros.com/nfl/players/terry-mclaurin.php,18466
+44,Darnell Mooney,D. Mooney,ATL,WR,vs. WAS,WR44,6.7,42,47,44.55,1.44,5,59.1,https://www.fantasypros.com/nfl/players/darnell-mooney.php,19810
+45,Travis Hunter,T. Hunter,JAC,WR,at SF,WR45,6.6,42,52,46.27,2.83,8,93.7,https://www.fantasypros.com/nfl/players/travis-hunter.php,26034
+46,Marquise Brown,M. Brown,KC,WR,vs. BAL,WR46,6.2,36,56,46.91,5.16,10,46.2,https://www.fantasypros.com/nfl/players/marquise-brown.php,18226
+47,Kayshon Boutte,K. Boutte,NE,WR,vs. CAR,WR47,6.2,44,55,48.91,3.03,14,9,https://www.fantasypros.com/nfl/players/kayshon-boutte.php,22989
+48,Tre Tucker,T. Tucker,LV,WR,vs. CHI,WR48,6.2,45,63,49.55,5.11,8,6.6,https://www.fantasypros.com/nfl/players/tre-tucker.php,25337
+49,Wan'Dale Robinson,W. Robinson,NYG,WR,vs. LAC,WR49,6.1,47,55,50.73,2.49,14,37,https://www.fantasypros.com/nfl/players/wandale-robinson.php,22985
+50,Rashid Shaheed,R. Shaheed,NO,WR,at BUF,WR50,6.1,42,55,50.91,4.76,11,69,https://www.fantasypros.com/nfl/players/rashid-shaheed.php,24687
+51,Stefon Diggs,S. Diggs,NE,WR,vs. CAR,WR51,6.1,46,54,50.91,2.15,14,86.4,https://www.fantasypros.com/nfl/players/stefon-diggs.php,13981
+52,Elic Ayomanor,E. Ayomanor,TEN,WR,at HOU,WR52,6.1,47,53,51.09,1.73,10,25.2,https://www.fantasypros.com/nfl/players/elic-ayomanor.php,27059
+53,Tyquan Thornton,T. Thornton,KC,WR,vs. BAL,WR53,6.0,40,66,52.09,8.28,10,1.7,https://www.fantasypros.com/nfl/players/tyquan-thornton.php,22913
+54,Troy Franklin,T. Franklin,DEN,WR,vs. CIN,WR54,6.0,37,62,52.64,6.54,12,33.3,https://www.fantasypros.com/nfl/players/troy-franklin.php,23092
+55,Josh Downs,J. Downs,IND,WR,at LAR,WR55,6.0,49,57,53.64,2.42,11,66.1,https://www.fantasypros.com/nfl/players/josh-downs.php,24706
+56,Xavier Worthy,X. Worthy,KC,WR,vs. BAL,WR56,5.9,39,84,55.36,11.71,10,94.7,https://www.fantasypros.com/nfl/players/xavier-worthy.php,23019
+57,Christian Kirk,C. Kirk,HOU,WR,vs. TEN,WR57,5.7,49,61,55.91,3.12,6,37.4,https://www.fantasypros.com/nfl/players/christian-kirk.php,17268
+58,Dontayvion Wicks,D. Wicks,GB,WR,at DAL,WR58,5.6,54,60,56.73,2.05,5,3.1,https://www.fantasypros.com/nfl/players/dontayvion-wicks.php,24354
+59,Cooper Kupp,C. Kupp,SEA,WR,at ARI,WR59,5.6,51,62,58.73,3.65,8,85.9,https://www.fantasypros.com/nfl/players/cooper-kupp.php,16433
+60,Calvin Austin III,C. Austin III,PIT,WR,vs. MIN,WR60,5.6,57,60,59.18,0.94,5,9.4,https://www.fantasypros.com/nfl/players/calvin-austin.php,23739
+61,Marvin Mims Jr.,M. Mims Jr.,DEN,WR,vs. CIN,WR61,5.5,58,66,62.36,2.01,12,42.1,https://www.fantasypros.com/nfl/players/marvin-mims.php,23080
+62,Tory Horton,T. Horton,SEA,WR,at ARI,WR62,5.4,57,70,62.73,3.72,8,4.3,https://www.fantasypros.com/nfl/players/tory-horton.php,26022
+63,KaVontae Turpin,K. Turpin,DAL,WR,vs. GB,WR63,5.2,57,68,63.64,3.67,10,4.1,https://www.fantasypros.com/nfl/players/kavontae-turpin.php,18520
+64,Rashod Bateman,R. Bateman,BAL,WR,at KC,WR64,5.2,57,68,63.91,3.40,7,32.1,https://www.fantasypros.com/nfl/players/rashod-bateman.php,19794
+65,DeAndre Hopkins,D. Hopkins,BAL,WR,at KC,WR65,5.2,64,71,66.00,2.70,7,16.8,https://www.fantasypros.com/nfl/players/deandre-hopkins.php,11606
+66,Joshua Palmer,J. Palmer,BUF,WR,vs. NO,WR66,5.1,60,70,66.36,2.84,7,20.5,https://www.fantasypros.com/nfl/players/josh-palmer.php,22845
+67,Jauan Jennings,J. Jennings,SF,WR,vs. JAC,WR67,5.1,36,125,66.82,25.21,14,82.3,https://www.fantasypros.com/nfl/players/jauan-jennings.php,19590
+68,Hunter Renfrow,H. Renfrow,CAR,WR,at NE,WR68,4.8,59,80,70.09,5.63,14,2.9,https://www.fantasypros.com/nfl/players/hunter-renfrow.php,18345
+69,JuJu Smith-Schuster,J. Smith-Schuster,KC,WR,vs. BAL,WR69,4.8,64,102,72.45,11.24,10,2.2,https://www.fantasypros.com/nfl/players/juju-smith-schuster.php,16427
+70,DeMario Douglas,D. Douglas,NE,WR,vs. CAR,WR70,4.7,67,82,72.45,5.38,14,18.7,https://www.fantasypros.com/nfl/players/demario-douglas.php,25304
+71,Dont'e Thornton Jr.,D. Thornton Jr.,LV,WR,vs. CHI,WR71,4.6,66,79,73.36,3.57,8,14.7,https://www.fantasypros.com/nfl/players/donte-thornton-jr.php,27288
+72,Jalen Tolbert,J. Tolbert,DAL,WR,vs. GB,WR72,4.6,65,83,74.18,6.24,10,2,https://www.fantasypros.com/nfl/players/jalen-tolbert.php,23770
+73,Kendrick Bourne,K. Bourne,SF,WR,vs. JAC,WR73,4.4,69,81,74.27,3.60,14,0.8,https://www.fantasypros.com/nfl/players/kendrick-bourne.php,17066
+74,Sterling Shepard,S. Shepard,TB,WR,vs. PHI,WR74,4.3,61,82,74.64,7.43,9,1,https://www.fantasypros.com/nfl/players/sterling-shepard.php,15569
+75,Luther Burden III,L. Burden III,CHI,WR,at LV,WR75,4.2,70,80,75.55,3.09,5,18,https://www.fantasypros.com/nfl/players/luther-burden-iii.php,27016
+76,Michael Wilson,M. Wilson,ARI,WR,vs. SEA,WR76,4.2,73,81,75.73,2.56,8,5.5,https://www.fantasypros.com/nfl/players/michael-wilson.php,25333
+77,Dyami Brown,D. Brown,JAC,WR,at SF,WR77,4.2,69,96,77.36,8.03,8,7.4,https://www.fantasypros.com/nfl/players/dyami-brown.php,20113
+78,Alec Pierce,A. Pierce,IND,WR,at LAR,WR78,4.1,71,95,77.36,6.54,11,5.8,https://www.fantasypros.com/nfl/players/alec-pierce.php,23791
+79,Darius Slayton,D. Slayton,NYG,WR,vs. LAC,WR79,4.0,74,82,77.45,2.71,14,3.8,https://www.fantasypros.com/nfl/players/darius-slayton.php,18706
+80,Jayden Higgins,J. Higgins,HOU,WR,vs. TEN,WR80,4.0,73,96,79.36,6.08,6,40.6,https://www.fantasypros.com/nfl/players/jayden-higgins.php,27077
+81,Olamide Zaccheaus,O. Zaccheaus,CHI,WR,at LV,WR81,3.9,72,87,79.82,4.78,5,1.1,https://www.fantasypros.com/nfl/players/olamide-zaccheaus.php,18864
+82,Jalen Nailor,J. Nailor,MIN,WR,at PIT,WR82,3.8,78,83,80.09,1.56,6,2.4,https://www.fantasypros.com/nfl/players/jalen-nailor.php,24177
+83,Parker Washington,P. Washington,JAC,WR,at SF,WR83,3.8,71,89,80.64,5.85,8,0.7,https://www.fantasypros.com/nfl/players/parker-washington.php,23106
+84,Adam Thielen,A. Thielen,MIN,WR,at PIT,WR84,3.8,83,93,85.55,2.74,6,30,https://www.fantasypros.com/nfl/players/adam-thielen.php,13429
+85,Devontez Walker,D. Walker,BAL,WR,at KC,WR85,3.8,72,131,86.82,19.00,7,0.6,https://www.fantasypros.com/nfl/players/devontez-walker.php,26011
+86,Andrei Iosivas,A. Iosivas,CIN,WR,at DEN,WR86,3.7,84,103,90.36,7.05,10,1.8,https://www.fantasypros.com/nfl/players/andrei-iosivas.php,25335
+87,Adonai Mitchell,A. Mitchell,IND,WR,at LAR,WR87,3.7,69,92,86.44,6.33,11,2.4,https://www.fantasypros.com/nfl/players/adonai-mitchell.php,24357
+88,Malik Washington,M. Washington,MIA,WR,vs. NYJ,WR88,3.7,68,93,87.33,7.57,12,2.4,https://www.fantasypros.com/nfl/players/malik-washington.php,26314
+89,Pat Bryant,P. Bryant,DEN,WR,vs. CIN,WR89,3.5,85,122,95.36,13.28,12,3.9,https://www.fantasypros.com/nfl/players/pat-bryant.php,27211
+90,Chris Godwin Jr.,C. Godwin Jr.,TB,WR,vs. PHI,WR90,3.4,62,101,87.00,13.66,9,75.1,https://www.fantasypros.com/nfl/players/chris-godwin.php,16406
+91,Luke McCaffrey,L. McCaffrey,WAS,WR,at ATL,WR91,3.4,89,129,98.10,11.40,12,0.7,https://www.fantasypros.com/nfl/players/luke-mccaffrey.php,26328
+92,Brandin Cooks,B. Cooks,NO,WR,at BUF,WR92,3.3,83,103,93.00,5.55,11,2.7,https://www.fantasypros.com/nfl/players/brandin-cooks.php,12122
+93,CeeDee Lamb,C. Lamb,DAL,WR,vs. GB,WR93,3.2,77,96,88.29,5.77,10,99.8,https://www.fantasypros.com/nfl/players/ceedee-lamb.php,19202
+94,Ray-Ray McCloud III,R. McCloud III,ATL,WR,vs. WAS,WR94,3.1,88,100,94.13,3.22,5,2.5,https://www.fantasypros.com/nfl/players/ray-ray-mccloud.php,17530
+95,Isaac TeSlaa,I. TeSlaa,DET,WR,vs. CLE,WR95,3.1,90,105,95.88,4.43,8,11.3,https://www.fantasypros.com/nfl/players/isaac-teslaa.php,27446
+96,Xavier Hutchinson,X. Hutchinson,HOU,WR,vs. TEN,WR96,3.1,93,102,96.25,2.77,6,0.6,https://www.fantasypros.com/nfl/players/xavier-hutchinson.php,25332
+97,Mack Hollins,M. Hollins,NE,WR,vs. CAR,WR97,3.1,90,107,98.25,5.74,14,0.9,https://www.fantasypros.com/nfl/players/mack-hollins.php,16489
+98,Isaiah Bond,I. Bond,CLE,WR,at DET,WR98,3.1,86,110,94.86,7.75,9,1.4,https://www.fantasypros.com/nfl/players/isaiah-bond.php,24371
+99,Elijah Moore,E. Moore,BUF,WR,vs. NO,WR99,2.7,95,113,100.38,5.63,7,0.8,https://www.fantasypros.com/nfl/players/elijah-moore.php,20114
+100,Jaylin Lane,J. Lane,WAS,WR,at ATL,WR100,2.7,84,103,92.83,6.96,12,1,https://www.fantasypros.com/nfl/players/jaylin-lane.php,27454
+101,Jahan Dotson,J. Dotson,PHI,WR,at TB,WR101,2.6,95,123,102.00,8.65,9,1.1,https://www.fantasypros.com/nfl/players/jahan-dotson.php,23101
+102,Tyler Lockett,T. Lockett,TEN,WR,at HOU,WR102,2.5,98,109,102.71,4.23,10,5.6,https://www.fantasypros.com/nfl/players/tyler-lockett.php,13971
+103,Kalif Raymond,K. Raymond,DET,WR,vs. CLE,WR103,2.4,100,124,106.13,7.04,8,0.6,https://www.fantasypros.com/nfl/players/kalif-raymond.php,16081
+104,Chimere Dike,C. Dike,TEN,WR,at HOU,WR104,2.4,92,107,98.80,5.11,10,0.7,https://www.fantasypros.com/nfl/players/chimere-dike.php,27315
+105,Arian Smith,A. Smith,NYJ,WR,at MIA,WR105,2.2,78,126,102.20,18.33,9,0.6,https://www.fantasypros.com/nfl/players/arian-smith.php,22965
+106,Demarcus Robinson,D. Robinson,SF,WR,vs. JAC,WR106,2.1,85,132,102.80,17.41,14,1.1,https://www.fantasypros.com/nfl/players/demarcus-robinson.php,15665
+107,Tutu Atwell,T. Atwell,LAR,WR,vs. IND,WR107,2.1,100,117,106.83,5.27,8,2.3,https://www.fantasypros.com/nfl/players/tutu-atwell.php,20126
+108,Savion Williams,S. Williams,GB,WR,at DAL,WR108,2.1,93,108,103.20,5.49,5,0.7,https://www.fantasypros.com/nfl/players/savion-williams.php,27144
+109,Nick Westbrook-Ikhine,N. Westbrook-Ikhine,MIA,WR,vs. NYJ,WR109,2.1,99,119,108.50,7.61,12,2.6,https://www.fantasypros.com/nfl/players/nick-westbrook.php,19747
+110,Tyler Johnson,T. Johnson,NYJ,WR,at MIA,WR110,2.1,92,128,109.50,10.98,9,1.1,https://www.fantasypros.com/nfl/players/tyler-johnson.php,18633
+111,Tre Harris,T. Harris,LAC,WR,at NYG,WR111,2.1,101,124,109.83,8.43,12,12.8,https://www.fantasypros.com/nfl/players/tre-harris.php,26215
+112,David Moore,D. Moore,CAR,WR,at NE,WR112,1.8,99,122,107.20,7.98,14,0.9,https://www.fantasypros.com/nfl/players/david-moore.php,16757
+113,Jordan Whittington,J. Whittington,LAR,WR,vs. IND,WR113,1.8,104,113,107.60,3.20,8,1.3,https://www.fantasypros.com/nfl/players/jordan-whittington.php,23135
+114,Tim Patrick,T. Patrick,JAC,WR,at SF,WR114,1.8,97,121,108.20,8.26,8,1.1,https://www.fantasypros.com/nfl/players/tim-patrick.php,16556
+115,Allen Lazard,A. Lazard,NYJ,WR,at MIA,WR115,1.7,80,127,108.80,15.82,9,1,https://www.fantasypros.com/nfl/players/allen-lazard.php,17301
+116,Jaylin Noel,J. Noel,HOU,WR,vs. TEN,WR116,1.6,104,126,112.33,8.14,6,1.9,https://www.fantasypros.com/nfl/players/jaylin-noel.php,27122
+117,Greg Dortch,G. Dortch,ARI,WR,vs. SEA,WR117,1.4,104,116,109.20,4.35,8,0.8,https://www.fantasypros.com/nfl/players/greg-dortch.php,18585
+118,Tez Johnson,T. Johnson,TB,WR,vs. PHI,WR118,1.4,84,128,109.80,15.03,9,0.7,https://www.fantasypros.com/nfl/players/tez-johnson.php,27147
+119,Chris Moore,C. Moore,WAS,WR,at ATL,WR119,1.4,91,118,102.00,11.58,12,0,https://www.fantasypros.com/nfl/players/chris-moore.php,15654
+120,Zay Jones,Z. Jones,ARI,WR,vs. SEA,WR120,1.4,108,122,112.00,5.79,8,0.6,https://www.fantasypros.com/nfl/players/zay-jones.php,16431
+121,Xavier Legette,X. Legette,CAR,WR,at NE,WR121,1.3,85,112,98.50,13.50,14,29.4,https://www.fantasypros.com/nfl/players/xavier-legette.php,26136
+122,Devaughn Vele,D. Vele,NO,WR,at BUF,WR122,1.3,102,135,115.50,12.66,11,0.9,https://www.fantasypros.com/nfl/players/devaughn-vele.php,26409
+123,Roman Wilson,R. Wilson,PIT,WR,vs. MIN,WR123,1.3,112,121,116.00,3.39,5,1.8,https://www.fantasypros.com/nfl/players/roman-wilson.php,26160
+124,Marquez Valdes-Scantling,M. Valdes-Scantling,SF,WR,vs. JAC,WR124,1.2,98,115,106.50,8.50,14,0.6,https://www.fantasypros.com/nfl/players/marquez-valdesscantling.php,17528
+125,Ryan Flournoy,R. Flournoy,DAL,WR,vs. GB,WR125,1.2,103,139,117.33,15.58,10,1.3,https://www.fantasypros.com/nfl/players/ryan-flournoy.php,26398
+126,Tylan Wallace,T. Wallace,BAL,WR,at KC,WR126,1.1,110,120,114.67,4.11,7,1,https://www.fantasypros.com/nfl/players/tylan-wallace.php,19801
+127,Brycen Tremayne,B. Tremayne,CAR,WR,at NE,WR127,1.1,102,128,119.25,10.43,14,0,https://www.fantasypros.com/nfl/players/brycen-tremayne.php,25631
+128,Kyle Williams,K. Williams,NE,WR,vs. CAR,WR128,1.0,107,119,113.00,6.00,14,7,https://www.fantasypros.com/nfl/players/kyle-williams-wr-2025.php,27487
+129,Jack Bech,J. Bech,LV,WR,vs. CHI,WR129,1.0,108,133,122.25,9.26,8,5.7,https://www.fantasypros.com/nfl/players/jack-bech.php,27224
+130,KeAndre Lambert-Smith,K. Lambert-Smith,LAC,WR,at NYG,WR130,1.0,100,142,121.00,21.00,12,0.9,https://www.fantasypros.com/nfl/players/keandre-lambert-smith.php,24372
+131,Jamari Thrash,J. Thrash,CLE,WR,at DET,WR131,1.0,115,124,120.67,4.03,9,0.7,https://www.fantasypros.com/nfl/players/jamari-thrash.php,26162
+132,Trent Sherfield Sr.,T. Sherfield Sr.,DEN,WR,vs. CIN,WR132,0.9,113,136,123.00,9.63,12,0.1,https://www.fantasypros.com/nfl/players/trent-sherfield.php,17888
+133,Van Jefferson,V. Jefferson,TEN,WR,at HOU,WR133,0.9,116,126,121.33,4.11,10,0.7,https://www.fantasypros.com/nfl/players/van-jefferson.php,19483
+134,Skyy Moore,S. Moore,SF,WR,vs. JAC,WR134,0.7,117,137,126.33,8.22,14,1.9,https://www.fantasypros.com/nfl/players/skyy-moore.php,23905
+135,John Metchie III,J. Metchie III,PHI,WR,at TB,WR135,0.6,121,150,135.50,14.50,9,0.8,https://www.fantasypros.com/nfl/players/john-metchie.php,22895
