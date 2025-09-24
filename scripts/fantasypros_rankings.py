@@ -26,7 +26,7 @@ import requests
 
 
 DEFAULT_POSITIONS = ["QB", "RB", "WR", "TE", "DST"]
-BASE_URL = "https://www.fantasypros.com/nfl/rankings/{pos}.php"
+BASE_URL = "https://www.fantasypros.com/nfl/rankings/{slug}.php"
 USER_AGENT = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
     "Chrome/124.0.0.0 Safari/537.36"
@@ -132,14 +132,27 @@ def write_players_csv(ecr_data: Dict, out_dir: str, requested_scoring: Optional[
     return out_path, len(players)
 
 
+def build_slug(position: str, scoring: str) -> str:
+    pos = position.strip().lower()
+    s = scoring.strip().upper()
+    # FantasyPros exposes alternate slugs for PPR/Half-PPR for skill positions
+    # Examples:
+    #  - half-point-ppr-rb.php, ppr-rb.php
+    #  - half-point-ppr-wr.php, ppr-wr.php
+    #  - half-point-ppr-te.php, ppr-te.php
+    # QB and DST typically do not vary by PPR, keep base slug
+    if s == "HALF" and pos in {"rb", "wr", "te", "flx"}:
+        return f"half-point-ppr-{pos}"
+    if s == "PPR" and pos in {"rb", "wr", "te", "flx"}:
+        return f"ppr-{pos}"
+    return pos
+
+
 def process_position(position: str, out_dir: str, scoring: str) -> FetchResult:
     pos_slug = position.strip().lower()
     scoring_param = scoring.strip().upper()
-    url = BASE_URL.format(pos=pos_slug)
-    # Append scoring parameter. Valid values observed: STD, HALF, PPR
-    if scoring_param:
-        connector = '&' if '?' in url else '?'
-        url = f"{url}{connector}scoring={scoring_param}"
+    slug = build_slug(pos_slug, scoring_param)
+    url = BASE_URL.format(slug=slug)
     # Ensure the Overview view is requested (matches user's requested setting)
     connector = '&' if '?' in url else '?'
     url = f"{url}{connector}view=overview"
