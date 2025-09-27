@@ -1,100 +1,69 @@
-# Clover Executive Dashboard
+## Footballguys Stats Scraper (GUI + CLI)
 
-A comprehensive dashboard to monitor sales data and manage expenses for Clover POS systems.
+This tool logs into Footballguys, scrapes weekly historical player stats for QB/FLEX/DEF, and upserts them into SQL Server via ODBC. It provides a Tkinter GUI when a display is available, and a CLI fallback for headless servers.
 
-## Features
+### Features
+- GUI with week/year/table selection and live logs
+- CLI flags and `.env` support
+- Selenium + Chrome with multiple login and data-page variants
+- Robust DB upsert via `MERGE` into a user-specified table
 
-- **Sales Monitoring**: View total sales, order count, and average order value
-- **Date Range Selection**: Filter data by predefined date ranges (Today, Yesterday, Last 7 Days, Last 30 Days, This Month, Last Month)
-- **Expense Management**: Add, edit, and delete expenses with categorization
-- **Data Visualization**: Interactive charts for sales trends
-- **Multi-store Support**: Switch between different store locations
-- **Cloud Database**: Utilizes Supabase for secure data storage
+### Requirements
+- Python 3.10+
+- Google Chrome installed
+- SQL Server reachable and ODBC Driver 17+ for SQL Server
+- Network access to footballguys.com
 
-## Requirements
-
-The application requires the following Python packages:
-- streamlit
-- pandas
-- plotly
-- requests
-- python-dotenv
-- supabase
-
-See `requirements.txt` for complete dependencies and versions.
-
-## Setup
-
-1. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-
-2. Configure Supabase credentials:
-   - Create a `.streamlit/secrets.toml` file with the following content:
-   ```
-   [supabase]
-   url = "YOUR_SUPABASE_URL"
-   key = "YOUR_SUPABASE_API_KEY"
-   service_role_key = "YOUR_SUPABASE_SERVICE_ROLE_KEY"
-   ```
-
-3. Run the application:
-   ```
-   streamlit run app.py
-   ```
-
-## Deployment
-
-See `deploy_to_streamlit_cloud.md` for detailed instructions on deploying to Streamlit Cloud.
-
-## Project Structure
-
-- `app.py`: Main Streamlit application
-- `cloud_db_utils.py`: Database interaction utilities
-- `requirements.txt`: Project dependencies
-- `.streamlit/`: Streamlit configuration directory
-
-## More Information
-
-For detailed information about Supabase connection options, check the `README_SUPABASE.md` file.
-
-## Getting Clover API Credentials
-
-1. Go to [Clover Developer Dashboard](https://sandbox.dev.clover.com/developers)
-2. Create a new app (or use an existing one)
-3. Generate an OAuth token for your merchant account
-4. Use that token and merchant ID in the secrets.toml file
-
-## Usage
-
-1. Start the application with `streamlit run app.py`
-2. Use the "Sync Data" button to fetch the latest data from Clover
-3. Use the dashboard controls to filter and analyze your data
-4. Add expenses through the Expenses tab
-5. View Profit & Loss reports
-
-## Database Structure
-
-The application uses either SQLite (local) or PostgreSQL (cloud) to store:
-- Store information
-- Payment data from Clover API
-- Order line item details
-- User-entered expenses
-
-## Migration from SQLite to Supabase
-
-To migrate your existing SQLite data to Supabase:
-```
-python migrate_to_supabase.py
+### Install
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env  # then edit .env with your credentials
 ```
 
-## Development Roadmap
+### Configure
+Edit `.env` (or set environment variables):
+- `FBG_EMAIL` / `FBG_PASSWORD`: Footballguys credentials
+- `DB_CONN_STR`: Optional custom SQL Server connection string
+- `WEEK`, `YEAR`, `TABLE_NAME`: Defaults for convenience
+- `HEADLESS`: Set `true` for headless Chrome
+- `USE_GUI`: Set `false` to force CLI even with a display
+- `CHROME_BINARY`: Path to Chrome if not in default location
+- `OUT_CSV`: Optional path to write scraped rows as CSV
 
-- [x] Basic data retrieval and storage
-- [x] Simple dashboard UI for verification
-- [x] Enhanced sales analytics
-- [x] Expense tracking functionality
-- [x] Cloud deployment with Supabase
-- [ ] Detailed P&L reporting
-- [ ] Data export functionality 
+Default DB connection if `DB_CONN_STR` is not set:
+```
+DRIVER={ODBC Driver 17 for SQL Server};SERVER=localhost;DATABASE=TonyDB;Trusted_Connection=yes;Connection Timeout=5;
+```
+
+### Run (GUI)
+```bash
+python fbg_scraper.py
+```
+If GUI cannot start (e.g., no DISPLAY), it automatically falls back to the CLI.
+
+### Run (CLI)
+```bash
+python fbg_scraper.py --week 1 --year 2025 --table FootballStats --headless \
+  --email "$FBG_EMAIL" --password "$FBG_PASSWORD" \
+  --db-conn-str "$DB_CONN_STR" --out-csv output.csv
+```
+All flags are optional if provided in `.env`.
+
+### Windows notes
+- Install Microsoft ODBC Driver 17+ for SQL Server.
+- Ensure Chrome is installed. If portable or nonstandard, set `CHROME_BINARY`.
+
+### Linux notes
+- Ensure Chrome is installed (e.g., `google-chrome-stable`).
+- On headless servers, use `--headless` and set `USE_GUI=false`.
+- You may need `unixodbc` and MS ODBC 17+ packages installed for `pyodbc` to connect.
+
+### Troubleshooting
+- Login failures: Verify credentials and that FBG login page layout has not changed.
+- DB connection: Test `DB_CONN_STR` using `isql`/`sqlcmd` or another SQL client.
+- Chrome/driver mismatch: `webdriver-manager` auto-installs a compatible driver; ensure Chrome is up to date.
+
+### Safety & Credentials
+Credentials are read from environment variables. Avoid committing `.env` to source control. 
